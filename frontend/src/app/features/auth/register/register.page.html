@@ -1,0 +1,157 @@
+<div class="deco deco-1"></div>
+<div class="deco deco-2"></div>
+<div class="gold-bar"></div>
+
+<div class="auth-shell">
+  <!-- ── Panneau gauche (desktop) ── -->
+  <aside class="info-panel">
+    <a routerLink="/splash" class="logo-mini">
+      <div class="logo-mark-sm logo-mark-lg"><div class="logo-inner-sm"><div class="logo-dot-sm"></div></div></div>
+      <div class="logo-name logo-name-lg">OWO<span>MI</span></div>
+    </a>
+    <div>
+      <div class="info-headline">Rejoignez des milliers d'utilisateurs qui gèrent <span>leur argent mieux.</span></div>
+      <p class="info-desc">Gratuit, sans publicité, sans limite. Votre budget, dans votre devise.</p>
+    </div>
+    <div class="info-features">
+      <div class="info-feature">
+        <div class="info-feat-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <span class="info-feat-text">Visualisez vos entrées et sorties en temps réel</span>
+      </div>
+      <div class="info-feature">
+        <div class="info-feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+        <span class="info-feat-text">Devise automatique selon votre pays</span>
+      </div>
+      <div class="info-feature">
+        <div class="info-feat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <span class="info-feat-text">Exportez vos rapports PDF en un clic</span>
+      </div>
+      <div class="info-feature">
+        <div class="info-feat-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <span class="info-feat-text">Données sécurisées — JWT + BCrypt</span>
+      </div>
+    </div>
+    <div class="info-note">OWOMI v1.0 — Gratuit &amp; international — Cotonou, Bénin</div>
+  </aside>
+
+  <!-- ── Colonne formulaire ── -->
+  <main class="form-col">
+    <a routerLink="/splash" class="logo-mini logo-top">
+      <div class="logo-mark-sm"><div class="logo-inner-sm"><div class="logo-dot-sm"></div></div></div>
+      <div class="logo-name">OWO<span>MI</span></div>
+    </a>
+
+    <form class="form-card" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-title">Créer un compte</div>
+      <div class="form-sub">Gratuit, sans carte bancaire.</div>
+
+      @if (registerError()) {
+        <div class="alert-err">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ registerError() }}
+        </div>
+      }
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Nom complet</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input id="name" type="text" formControlName="name" placeholder="Jean Dupont"
+                   [class.err]="form.controls.name.touched && form.controls.name.invalid">
+          </div>
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <span class="hint err">Le nom doit contenir entre 2 et 100 caractères.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="email">Adresse email</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input id="email" type="email" formControlName="email" placeholder="jean@email.com"
+                   [class.err]="emailState() === 'err'" [class.ok]="emailState() === 'ok'">
+          </div>
+          @if (emailState() === 'ok') {
+            <span class="hint ok">✓ Email valide</span>
+          } @else if (emailState() === 'err') {
+            <span class="hint err">Format invalide (ex : jean&#64;email.com)</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <input id="password" [type]="showPassword() ? 'text' : 'password'" class="pwd-field"
+                 formControlName="password" placeholder="Min. 8 caractères">
+          <button class="eye-btn" type="button" (click)="togglePassword()"
+                  [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            @if (showPassword()) {
+              <svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            } @else {
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            }
+          </button>
+        </div>
+        <div class="pwd-strength">
+          @for (b of bars; track b) {
+            <div class="pwd-bar" [style.background]="barBackground(b)"></div>
+          }
+        </div>
+        @if (strengthLabel()) {
+          <span class="hint" [style.color]="strengthLabelColor()">{{ strengthLabel() }}</span>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="country">Pays</label>
+          <div class="input-wrap select-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            <select id="country" formControlName="countryCode" (change)="onCountryChange()">
+              <option value="">Sélectionner un pays</option>
+              @for (c of countries; track c.code) {
+                <option [value]="c.code">{{ c.label }}</option>
+              }
+            </select>
+            <div class="select-arrow"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="currency">Devise <span class="label-soft">(suggérée selon votre pays)</span></label>
+          <div class="input-wrap select-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            <select id="currency" formControlName="currencyCode"
+                    [class.ok]="currencySuggested() && form.controls.currencyCode.value">
+              <option value="">— Choisir d'abord un pays —</option>
+              @for (cur of currencies; track cur.code) {
+                <option [value]="cur.code">{{ cur.label }}</option>
+              }
+            </select>
+            <div class="select-arrow"></div>
+          </div>
+          @if (currencySuggested() && form.controls.currencyCode.value) {
+            <span class="hint ok">✓ Devise suggérée pour votre pays — modifiable</span>
+          }
+        </div>
+      </div>
+
+      <button class="btn-submit" type="submit" [class.loading]="isLoading()" [disabled]="isLoading()">
+        {{ isLoading() ? 'Création en cours…' : 'Créer mon compte' }}
+      </button>
+
+      <div class="divider"><div class="divider-line"></div><span>ou</span><div class="divider-line"></div></div>
+
+      <button class="btn-google" type="button" disabled>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continuer avec Google
+      </button>
+
+      <div class="cgu">En créant un compte vous acceptez nos <a href="#" (click)="$event.preventDefault()">Conditions d'utilisation</a> et notre <a href="#" (click)="$event.preventDefault()">Politique de confidentialité</a>.</div>
+      <div class="login-link">Déjà un compte ? <a routerLink="/auth/login">Se connecter</a></div>
+    </form>
+  </main>
+</div>

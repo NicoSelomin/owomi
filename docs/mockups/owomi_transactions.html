@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OWOMI — Transactions</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --nuit:   #0C131E;
+  --nuit-d: #1A2235;
+  --nuit-c: #243047;
+  --or:     #D49E10;
+  --vert:   #1D9E75;
+  --corail: #D85A30;
+  --blanc:  #FFFFFF;
+  --gris:   #888780;
+  --bg:     #F7F5F0;
+  --fd:     'Sora', sans-serif;
+  --fb:     'Plus Jakarta Sans', sans-serif;
+}
+html, body { width:100%; min-height:100%; font-family:var(--fb); background:var(--bg); color:var(--nuit); }
+
+/* ── SIDEBAR (desktop) ── */
+.sidebar { position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--nuit);display:flex;flex-direction:column;z-index:100;padding:0 0 24px; }
+.sidebar-logo { padding:24px 20px 20px;border-bottom:.5px solid rgba(255,255,255,.06);margin-bottom:8px; }
+.logo-mini { display:flex;align-items:center;gap:10px;text-decoration:none; }
+.logo-mark { width:34px;height:34px;border-radius:9px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.logo-inner { width:17px;height:17px;border-radius:50%;background:var(--nuit);display:flex;align-items:center;justify-content:center; }
+.logo-dot { width:6px;height:6px;border-radius:50%;background:var(--or); }
+.logo-name { font-family:var(--fd);font-size:18px;font-weight:700;color:var(--blanc);letter-spacing:.04em; }
+.logo-name span { color:var(--or); }
+.nav-section { padding:0 12px;margin-bottom:4px; }
+.nav-label { font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;padding:8px 8px 4px; }
+.nav-item { display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);text-decoration:none;cursor:pointer;transition:all .15s;margin-bottom:2px; }
+.nav-item svg { width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0; }
+.nav-item:hover { background:rgba(255,255,255,.06);color:rgba(255,255,255,.8); }
+.nav-item.active { background:rgba(212,158,16,.15);color:var(--or); }
+.nav-item.active svg { stroke:var(--or); }
+.sidebar-footer { margin-top:auto;padding:0 12px;border-top:.5px solid rgba(255,255,255,.06);padding-top:16px; }
+.user-card { display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.07); }
+.avatar { width:32px;height:32px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:13px;font-weight:700;color:var(--nuit);flex-shrink:0; }
+.user-info { flex:1;min-width:0; }
+.user-name { font-size:12px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.user-devise { font-size:10px;color:rgba(255,255,255,.3); }
+.logout-btn { background:none;border:none;cursor:pointer;padding:4px; }
+.logout-btn svg { width:14px;height:14px;stroke:rgba(255,255,255,.25);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+
+/* ── TOP BAR (mobile/tablet) ── */
+.top-bar { position:fixed;top:0;left:0;right:0;height:56px;background:var(--nuit);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:99;border-bottom:.5px solid rgba(255,255,255,.06); }
+.top-bar-right { display:flex;align-items:center;gap:12px; }
+.top-avatar { width:32px;height:32px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:12px;font-weight:700;color:var(--nuit); }
+
+/* ── TAB BAR ── */
+.tab-bar { position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--nuit);display:flex;align-items:center;border-top:.5px solid rgba(255,255,255,.06);z-index:100;padding:0 8px; }
+.tab-item { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:500;color:rgba(255,255,255,.4);cursor:pointer;transition:all .15s;text-decoration:none; }
+.tab-item svg { width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.tab-item.active { color:var(--or); }
+.tab-item.active svg { stroke:var(--or); }
+.tab-fab { width:48px;height:48px;border-radius:50%;background:var(--or);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin:0 8px;box-shadow:0 4px 16px rgba(212,158,16,.35); }
+.tab-fab svg { width:22px;height:22px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round; }
+
+/* ── PAGE HEADER ── */
+.page-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px; }
+.page-title { font-family:var(--fd);font-size:22px;font-weight:700;color:var(--nuit); }
+.btn-add { display:flex;align-items:center;gap:6px;background:var(--or);color:var(--nuit);border:none;border-radius:10px;padding:9px 16px;font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s; }
+.btn-add:hover { opacity:.9; }
+.btn-add svg { width:15px;height:15px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round; }
+
+/* ── RÉSUMÉ RAPIDE ── */
+.summary-row { display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px; }
+.summary-card { background:var(--blanc);border-radius:12px;padding:12px 14px;border:.5px solid rgba(0,0,0,.06); }
+.summary-label { font-size:11px;color:var(--gris);margin-bottom:3px; }
+.summary-value { font-family:var(--fd);font-size:16px;font-weight:700; }
+.summary-value.income { color:var(--vert); }
+.summary-value.expense { color:var(--corail); }
+.summary-value.balance { color:var(--nuit); }
+
+/* ── FILTRES ── */
+.filters-wrap { background:var(--blanc);border-radius:14px;padding:14px;margin-bottom:16px;border:.5px solid rgba(0,0,0,.06); }
+.filters-row { display:flex;gap:8px;flex-wrap:wrap;align-items:center; }
+.filter-chips { display:flex;gap:6px;flex-wrap:wrap; }
+.chip { display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:.5px solid rgba(0,0,0,.1);background:var(--bg);color:var(--gris);transition:all .15s;white-space:nowrap; }
+.chip.active { background:var(--nuit);color:var(--blanc);border-color:var(--nuit); }
+.chip.active-income { background:#E1F5EE;color:#085041;border-color:#1D9E75; }
+.chip.active-expense { background:#FAECE7;color:#4A1B0C;border-color:#D85A30; }
+.chip svg { width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+
+.search-wrap { position:relative;flex:1;min-width:160px; }
+.search-wrap svg { position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--gris);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none; }
+.search-input { width:100%;height:36px;border-radius:9px;border:.5px solid rgba(0,0,0,.1);background:var(--bg);font-family:var(--fb);font-size:13px;color:var(--nuit);padding:0 12px 0 32px;outline:none;transition:border-color .2s; }
+.search-input:focus { border-color:var(--or);box-shadow:0 0 0 3px rgba(212,158,16,.12); }
+.search-input::placeholder { color:var(--gris); }
+
+.filter-select { height:36px;border-radius:9px;border:.5px solid rgba(0,0,0,.1);background:var(--bg);font-family:var(--fb);font-size:12px;color:var(--nuit);padding:0 28px 0 10px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;transition:border-color .2s; }
+.filter-select:focus { border-color:var(--or); }
+.select-wrap { position:relative; }
+.select-wrap::after { content:'';position:absolute;right:9px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--gris);pointer-events:none; }
+
+/* ── LISTE TRANSACTIONS ── */
+.tx-section { margin-bottom:20px; }
+.tx-date-header { font-size:12px;font-weight:600;color:var(--gris);padding:8px 0 6px;letter-spacing:.04em;text-transform:uppercase; }
+.tx-list { background:var(--blanc);border-radius:14px;border:.5px solid rgba(0,0,0,.06);overflow:hidden; }
+.tx-item { display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:.5px solid #F2F0EB;cursor:pointer;transition:background .12s; }
+.tx-item:last-child { border-bottom:none; }
+.tx-item:hover { background:#FAFAF8; }
+.tx-icon { width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.tx-icon svg { width:17px;height:17px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.tx-icon.income { background:#E1F5EE; }
+.tx-icon.income svg { stroke:#0F6E56; }
+.tx-icon.expense { background:#FAECE7; }
+.tx-icon.expense svg { stroke:#993C1D; }
+.tx-body { flex:1;min-width:0; }
+.tx-name { font-size:14px;font-weight:500;color:var(--nuit);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tx-meta { font-size:11px;color:var(--gris);margin-top:2px; }
+.tx-right { display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0; }
+.tx-amount { font-family:var(--fd);font-size:14px;font-weight:600; }
+.tx-amount.income { color:var(--vert); }
+.tx-amount.expense { color:var(--corail); }
+.tx-badge { font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500; }
+.tx-badge.income { background:#E1F5EE;color:#085041; }
+.tx-badge.expense { background:#FAECE7;color:#4A1B0C; }
+
+/* ── ACTIONS SWIPE (mobile) ── */
+.tx-actions { display:none; }
+
+/* ── PAGINATION ── */
+.pagination { display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px; }
+.page-btn { width:34px;height:34px;border-radius:8px;border:.5px solid rgba(0,0,0,.1);background:var(--blanc);color:var(--gris);font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s; }
+.page-btn.active { background:var(--nuit);color:var(--blanc);border-color:var(--nuit); }
+.page-btn:hover:not(.active) { border-color:var(--or);color:var(--or); }
+.page-btn svg { width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round; }
+
+/* ── MODAL AJOUT ── */
+.modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:flex-end;justify-content:center; }
+.modal-overlay.hidden { display:none; }
+.modal-overlay.desktop { align-items:center; }
+.modal { background:var(--blanc);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto; }
+.modal.desktop { border-radius:20px;padding:28px 32px; }
+.modal-handle { width:36px;height:4px;background:#E8E6DF;border-radius:2px;margin:0 auto 20px; }
+.modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; }
+.modal-title { font-family:var(--fd);font-size:18px;font-weight:700;color:var(--nuit); }
+.modal-close { background:none;border:none;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background .15s; }
+.modal-close:hover { background:var(--bg); }
+.modal-close svg { width:18px;height:18px;stroke:var(--gris);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+
+/* Type toggle */
+.type-toggle { display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:18px; }
+.type-btn { padding:10px;border-radius:9px;border:none;font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px; }
+.type-btn svg { width:15px;height:15px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.type-btn.income { background:#E1F5EE;color:#085041; }
+.type-btn.income svg { stroke:#0F6E56; }
+.type-btn.expense-inactive { background:transparent;color:var(--gris); }
+.type-btn.expense-inactive svg { stroke:var(--gris); }
+
+/* Form elements modal */
+.modal-group { display:flex;flex-direction:column;gap:5px;margin-bottom:14px; }
+.modal-label { font-size:13px;font-weight:500;color:rgba(0,0,0,.6); }
+.modal-input { width:100%;height:46px;border-radius:10px;border:.5px solid rgba(0,0,0,.12);background:var(--bg);font-family:var(--fb);font-size:14px;color:var(--nuit);padding:0 14px;outline:none;transition:border-color .2s; }
+.modal-input:focus { border-color:var(--or);box-shadow:0 0 0 3px rgba(212,158,16,.12); }
+.modal-input::placeholder { color:var(--gris); }
+.modal-select { width:100%;height:46px;border-radius:10px;border:.5px solid rgba(0,0,0,.12);background:var(--bg);font-family:var(--fb);font-size:14px;color:var(--nuit);padding:0 14px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;transition:border-color .2s; }
+.modal-select:focus { border-color:var(--or); }
+.modal-row { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+.amount-input-wrap { position:relative; }
+.amount-currency { position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:600;color:var(--gris);pointer-events:none; }
+.amount-input-wrap .modal-input { padding-left:52px;font-family:var(--fd);font-size:18px;font-weight:700;color:var(--nuit); }
+.btn-modal-submit { width:100%;height:50px;border-radius:12px;background:var(--or);color:var(--nuit);font-family:var(--fb);font-size:15px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;margin-top:8px; }
+.btn-modal-submit:hover { opacity:.9; }
+
+/* ── FAB ── */
+.fab-desktop { position:fixed;bottom:32px;right:32px;width:52px;height:52px;border-radius:50%;background:var(--or);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(212,158,16,.4);transition:transform .15s,box-shadow .15s;z-index:50; }
+.fab-desktop:hover { transform:scale(1.08); }
+.fab-desktop svg { width:22px;height:22px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round; }
+
+/* ── LAYOUTS ── */
+.layout-mobile { display:block; }
+.layout-mobile .main { padding:72px 16px 80px; }
+.layout-tablet { display:none; }
+.layout-tablet .main { padding:80px 24px 80px;max-width:720px;margin:0 auto; }
+.layout-desktop { display:none; }
+.layout-desktop .app-shell { display:flex;min-height:100vh; }
+.layout-desktop .content-area { margin-left:220px;flex:1;padding:32px;min-height:100vh; }
+.layout-desktop .top-bar { display:none; }
+.layout-desktop .tab-bar { display:none; }
+.layout-desktop .page-title { font-size:24px; }
+
+@media (min-width:640px) and (max-width:1023px) {
+  .layout-mobile { display:none; }
+  .layout-tablet { display:block; }
+}
+@media (min-width:1024px) {
+  .layout-mobile { display:none; }
+  .layout-tablet { display:none; }
+  .layout-desktop { display:block; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MOBILE                                                   -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="layout-mobile">
+  <div class="top-bar">
+    <div class="logo-mini">
+      <div class="logo-mark" style="width:28px;height:28px;border-radius:8px"><div class="logo-inner" style="width:14px;height:14px"><div class="logo-dot" style="width:5px;height:5px"></div></div></div>
+      <span class="logo-name" style="font-size:16px;color:var(--blanc)">OWO<span>MI</span></span>
+    </div>
+    <div class="top-bar-right">
+      <div class="top-avatar">VN</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">Transactions</div>
+      <button class="btn-add" onclick="openModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter
+      </button>
+    </div>
+
+    <!-- Résumé -->
+    <div class="summary-row">
+      <div class="summary-card"><div class="summary-label">Entrées</div><div class="summary-value income">+235k</div></div>
+      <div class="summary-card"><div class="summary-label">Sorties</div><div class="summary-value expense">−147k</div></div>
+      <div class="summary-card"><div class="summary-label">Solde</div><div class="summary-value balance">87k</div></div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="filters-wrap">
+      <div class="filters-row" style="margin-bottom:10px">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" type="text" placeholder="Rechercher...">
+        </div>
+        <div class="select-wrap"><select class="filter-select"><option>Juin 2026</option><option>Mai 2026</option><option>Avr 2026</option></select></div>
+      </div>
+      <div class="filter-chips">
+        <div class="chip active" onclick="filterChip(this,'all')">Tout</div>
+        <div class="chip" onclick="filterChip(this,'income')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          Entrées
+        </div>
+        <div class="chip" onclick="filterChip(this,'expense')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+          Sorties
+        </div>
+        <div class="select-wrap"><select class="filter-select" style="font-size:12px"><option>Toutes catégories</option><option>Alimentation</option><option>Transport</option><option>Logement</option><option>Loisirs</option><option>Revenus</option></select></div>
+      </div>
+    </div>
+
+    <!-- Groupe 01 Juin -->
+    <div class="tx-section">
+      <div class="tx-date-header">01 juin 2026</div>
+      <div class="tx-list">
+        <div class="tx-item">
+          <div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+          <div class="tx-body"><div class="tx-name">Salaire juin</div><div class="tx-meta">Revenus · Virement</div></div>
+          <div class="tx-right"><div class="tx-amount income">+200 000</div><div class="tx-badge income">Entrée</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Groupe 03 Juin -->
+    <div class="tx-section">
+      <div class="tx-date-header">03 juin 2026</div>
+      <div class="tx-list">
+        <div class="tx-item">
+          <div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+          <div class="tx-body"><div class="tx-name">Courses Erevan Market</div><div class="tx-meta">Alimentation</div></div>
+          <div class="tx-right"><div class="tx-amount expense">−18 500</div><div class="tx-badge expense">Sortie</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Groupe 05 Juin -->
+    <div class="tx-section">
+      <div class="tx-date-header">05 juin 2026</div>
+      <div class="tx-list">
+        <div class="tx-item">
+          <div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+          <div class="tx-body"><div class="tx-name">Freelance design</div><div class="tx-meta">Revenus · Client ABC</div></div>
+          <div class="tx-right"><div class="tx-amount income">+35 000</div><div class="tx-badge income">Entrée</div></div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div class="tx-body"><div class="tx-name">Facture SBEE</div><div class="tx-meta">Logement · Électricité</div></div>
+          <div class="tx-right"><div class="tx-amount expense">−12 000</div><div class="tx-badge expense">Sortie</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Groupe 07 Juin -->
+    <div class="tx-section">
+      <div class="tx-date-header">07 juin 2026</div>
+      <div class="tx-list">
+        <div class="tx-item">
+          <div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="tx-body"><div class="tx-name">Loyer juillet</div><div class="tx-meta">Logement · Mensuel</div></div>
+          <div class="tx-right"><div class="tx-amount expense">−45 000</div><div class="tx-badge expense">Sortie</div></div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div class="tx-body"><div class="tx-name">Abonnement internet</div><div class="tx-meta">Loisirs · MTN</div></div>
+          <div class="tx-right"><div class="tx-amount expense">−12 000</div><div class="tx-badge expense">Sortie</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Groupe 10 Juin -->
+    <div class="tx-section">
+      <div class="tx-date-header">10 juin 2026</div>
+      <div class="tx-list">
+        <div class="tx-item">
+          <div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+          <div class="tx-body"><div class="tx-name">Carburant moto</div><div class="tx-meta">Transport</div></div>
+          <div class="tx-right"><div class="tx-amount expense">−8 000</div><div class="tx-badge expense">Sortie</div></div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+          <div class="tx-body"><div class="tx-name">Pharmacie Atinkanmey</div><div class="tx-meta">Santé</div></div>
+          <div class="tx-right"><div class="tx-amount expense">−6 500</div><div class="tx-badge expense">Sortie</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button class="page-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <a href="owomi_dashboard.html" class="tab-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Accueil</a>
+    <a href="#" class="tab-item active"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+    <button class="tab-fab" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>Profil</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TABLET                                                   -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="layout-tablet">
+  <div class="top-bar">
+    <div class="logo-mini">
+      <div class="logo-mark" style="width:30px;height:30px;border-radius:9px"><div class="logo-inner" style="width:15px;height:15px"><div class="logo-dot" style="width:6px;height:6px"></div></div></div>
+      <span class="logo-name" style="color:var(--blanc)">OWO<span>MI</span></span>
+    </div>
+    <div class="top-bar-right"><div class="top-avatar">VN</div></div>
+  </div>
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">Transactions</div>
+      <button class="btn-add" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button>
+    </div>
+    <div class="summary-row">
+      <div class="summary-card"><div class="summary-label">Entrées du mois</div><div class="summary-value income">+235 000 FCFA</div></div>
+      <div class="summary-card"><div class="summary-label">Sorties du mois</div><div class="summary-value expense">−147 500 FCFA</div></div>
+      <div class="summary-card"><div class="summary-label">Solde</div><div class="summary-value balance">87 500 FCFA</div></div>
+    </div>
+    <div class="filters-wrap">
+      <div class="filters-row">
+        <div class="search-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="search-input" type="text" placeholder="Rechercher une transaction..."></div>
+        <div class="select-wrap"><select class="filter-select"><option>Juin 2026</option><option>Mai 2026</option></select></div>
+        <div class="select-wrap"><select class="filter-select"><option>Toutes catégories</option><option>Alimentation</option><option>Transport</option><option>Logement</option></select></div>
+      </div>
+      <div class="filter-chips" style="margin-top:10px">
+        <div class="chip active">Tout</div>
+        <div class="chip"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>Entrées</div>
+        <div class="chip"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>Sorties</div>
+      </div>
+    </div>
+    <!-- Transactions groupées -->
+    <div class="tx-section"><div class="tx-date-header">01 juin 2026</div><div class="tx-list"><div class="tx-item"><div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="tx-body"><div class="tx-name">Salaire juin</div><div class="tx-meta">Revenus · Virement bancaire</div></div><div class="tx-right"><div class="tx-amount income">+200 000 FCFA</div><div class="tx-badge income">Entrée</div></div></div></div></div>
+    <div class="tx-section"><div class="tx-date-header">03 juin 2026</div><div class="tx-list"><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><div class="tx-body"><div class="tx-name">Courses Erevan Market</div><div class="tx-meta">Alimentation</div></div><div class="tx-right"><div class="tx-amount expense">−18 500 FCFA</div><div class="tx-badge expense">Sortie</div></div></div></div></div>
+    <div class="tx-section"><div class="tx-date-header">05 juin 2026</div><div class="tx-list"><div class="tx-item"><div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="tx-body"><div class="tx-name">Freelance design</div><div class="tx-meta">Revenus · Client ABC</div></div><div class="tx-right"><div class="tx-amount income">+35 000 FCFA</div><div class="tx-badge income">Entrée</div></div></div><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="tx-body"><div class="tx-name">Facture SBEE</div><div class="tx-meta">Logement · Électricité</div></div><div class="tx-right"><div class="tx-amount expense">−12 000 FCFA</div><div class="tx-badge expense">Sortie</div></div></div></div></div>
+    <div class="tx-section"><div class="tx-date-header">07 juin 2026</div><div class="tx-list"><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="tx-body"><div class="tx-name">Loyer juillet</div><div class="tx-meta">Logement · Mensuel</div></div><div class="tx-right"><div class="tx-amount expense">−45 000 FCFA</div><div class="tx-badge expense">Sortie</div></div></div><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="tx-body"><div class="tx-name">Abonnement internet</div><div class="tx-meta">Loisirs · MTN</div></div><div class="tx-right"><div class="tx-amount expense">−12 000 FCFA</div><div class="tx-badge expense">Sortie</div></div></div></div></div>
+    <div class="pagination">
+      <button class="page-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button>
+      <button class="page-btn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <a href="owomi_dashboard.html" class="tab-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Accueil</a>
+    <a href="#" class="tab-item active"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+    <button class="tab-fab" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>Profil</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- DESKTOP                                                  -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="layout-desktop">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo"><a href="owomi_dashboard.html" class="logo-mini"><div class="logo-mark"><div class="logo-inner"><div class="logo-dot"></div></div></div><div class="logo-name">OWO<span>MI</span></div></a></div>
+      <div class="nav-section">
+        <div class="nav-label">Principal</div>
+        <a href="owomi_dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Tableau de bord</a>
+        <a href="#" class="nav-item active"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Gestion</div>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Catégories</a>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>Paramètres</a>
+      </div>
+      <div class="sidebar-footer"><div class="user-card"><div class="avatar">VN</div><div class="user-info"><div class="user-name">Nicodème V.</div><div class="user-devise">XOF — FCFA</div></div><button class="logout-btn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button></div></div>
+    </div>
+
+    <div class="content-area">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div><div style="font-size:13px;color:var(--gris);margin-bottom:2px">Juin 2026</div><div class="page-title">Transactions</div></div>
+        <button class="btn-add" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouvelle transaction</button>
+      </div>
+
+      <div class="summary-row" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:20px">
+        <div class="summary-card"><div class="summary-label">Total entrées</div><div class="summary-value income">+235 000 FCFA</div></div>
+        <div class="summary-card"><div class="summary-label">Total sorties</div><div class="summary-value expense">−147 500 FCFA</div></div>
+        <div class="summary-card"><div class="summary-label">Solde net</div><div class="summary-value balance">87 500 FCFA</div></div>
+      </div>
+
+      <div class="filters-wrap">
+        <div class="filters-row">
+          <div class="search-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="search-input" type="text" placeholder="Rechercher une transaction..."></div>
+          <div class="select-wrap"><select class="filter-select"><option>Juin 2026</option><option>Mai 2026</option><option>Avr 2026</option></select></div>
+          <div class="select-wrap"><select class="filter-select"><option>Toutes catégories</option><option>Alimentation</option><option>Transport</option><option>Logement</option><option>Loisirs</option><option>Revenus</option></select></div>
+          <div class="filter-chips">
+            <div class="chip active">Tout</div>
+            <div class="chip"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>Entrées</div>
+            <div class="chip"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>Sorties</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tx-section"><div class="tx-date-header">01 juin 2026</div><div class="tx-list"><div class="tx-item"><div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="tx-body"><div class="tx-name">Salaire juin</div><div class="tx-meta">Revenus · Virement bancaire</div></div><div class="tx-right"><div class="tx-amount income">+200 000 FCFA</div><div class="tx-badge income">Entrée</div></div></div></div></div>
+      <div class="tx-section"><div class="tx-date-header">03 juin 2026</div><div class="tx-list"><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><div class="tx-body"><div class="tx-name">Courses Erevan Market</div><div class="tx-meta">Alimentation · Supermarché</div></div><div class="tx-right"><div class="tx-amount expense">−18 500 FCFA</div><div class="tx-badge expense">Sortie</div></div></div></div></div>
+      <div class="tx-section"><div class="tx-date-header">05 juin 2026</div><div class="tx-list"><div class="tx-item"><div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="tx-body"><div class="tx-name">Freelance design</div><div class="tx-meta">Revenus · Client ABC</div></div><div class="tx-right"><div class="tx-amount income">+35 000 FCFA</div><div class="tx-badge income">Entrée</div></div></div><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="tx-body"><div class="tx-name">Facture SBEE</div><div class="tx-meta">Logement · Électricité</div></div><div class="tx-right"><div class="tx-amount expense">−12 000 FCFA</div><div class="tx-badge expense">Sortie</div></div></div></div></div>
+      <div class="tx-section"><div class="tx-date-header">07 juin 2026</div><div class="tx-list"><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="tx-body"><div class="tx-name">Loyer juillet</div><div class="tx-meta">Logement · Mensuel</div></div><div class="tx-right"><div class="tx-amount expense">−45 000 FCFA</div><div class="tx-badge expense">Sortie</div></div></div><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="tx-body"><div class="tx-name">Abonnement internet</div><div class="tx-meta">Loisirs · MTN</div></div><div class="tx-right"><div class="tx-amount expense">−12 000 FCFA</div><div class="tx-badge expense">Sortie</div></div></div></div></div>
+      <div class="tx-section"><div class="tx-date-header">10 juin 2026</div><div class="tx-list"><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="tx-body"><div class="tx-name">Carburant moto</div><div class="tx-meta">Transport</div></div><div class="tx-right"><div class="tx-amount expense">−8 000 FCFA</div><div class="tx-badge expense">Sortie</div></div></div><div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><div class="tx-body"><div class="tx-name">Pharmacie Atinkanmey</div><div class="tx-meta">Santé</div></div><div class="tx-right"><div class="tx-amount expense">−6 500 FCFA</div><div class="tx-badge expense">Sortie</div></div></div></div></div>
+
+      <div class="pagination">
+        <button class="page-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button>
+        <button class="page-btn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <button class="fab-desktop" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MODAL AJOUT TRANSACTION                                  -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Nouvelle transaction</div>
+      <button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <!-- Type toggle -->
+    <div class="type-toggle" id="typeToggle">
+      <button class="type-btn income" onclick="setType('income')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        Entrée
+      </button>
+      <button class="type-btn expense-inactive" onclick="setType('expense')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        Sortie
+      </button>
+    </div>
+
+    <!-- Montant -->
+    <div class="modal-group">
+      <label class="modal-label">Montant</label>
+      <div class="amount-input-wrap">
+        <span class="amount-currency">FCFA</span>
+        <input class="modal-input" type="number" placeholder="0" id="amountInput">
+      </div>
+    </div>
+
+    <!-- Catégorie + Date -->
+    <div class="modal-row">
+      <div class="modal-group">
+        <label class="modal-label">Catégorie</label>
+        <select class="modal-select" id="categorySelect">
+          <option value="">Choisir...</option>
+          <option>Alimentation</option>
+          <option>Transport</option>
+          <option>Logement</option>
+          <option>Santé</option>
+          <option>Loisirs</option>
+          <option>Revenus</option>
+          <option>Épargne</option>
+        </select>
+      </div>
+      <div class="modal-group">
+        <label class="modal-label">Date</label>
+        <input class="modal-input" type="date" id="dateInput" value="2026-06-22">
+      </div>
+    </div>
+
+    <!-- Note -->
+    <div class="modal-group">
+      <label class="modal-label">Note <span style="color:var(--gris);font-weight:400">(optionnel)</span></label>
+      <input class="modal-input" type="text" placeholder="Ex: Courses du weekend">
+    </div>
+
+    <button class="btn-modal-submit">Enregistrer</button>
+  </div>
+</div>
+
+<script>
+// ── MODAL ──
+function openModal() {
+  const overlay = document.getElementById('modalOverlay');
+  overlay.classList.remove('hidden');
+  if (window.innerWidth >= 1024) overlay.classList.add('desktop');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.add('hidden');
+}
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ── TYPE TOGGLE ──
+let currentType = 'income';
+function setType(type) {
+  currentType = type;
+  const toggle = document.getElementById('typeToggle');
+  const [incBtn, expBtn] = toggle.querySelectorAll('.type-btn');
+  if (type === 'income') {
+    incBtn.className = 'type-btn income';
+    expBtn.className = 'type-btn expense-inactive';
+  } else {
+    incBtn.className = 'type-btn income-inactive';
+    incBtn.style.background = 'transparent';
+    incBtn.style.color = 'var(--gris)';
+    expBtn.className = 'type-btn';
+    expBtn.style.background = '#FAECE7';
+    expBtn.style.color = '#4A1B0C';
+    const svg = expBtn.querySelector('svg');
+    if (svg) svg.style.stroke = '#993C1D';
+  }
+}
+
+// ── FILTER CHIPS ──
+function filterChip(el, type) {
+  el.closest('.filter-chips').querySelectorAll('.chip').forEach(c => {
+    c.classList.remove('active','active-income','active-expense');
+    c.style.background = '';
+    c.style.color = '';
+    c.style.borderColor = '';
+  });
+  if (type === 'income') el.classList.add('active-income');
+  else if (type === 'expense') el.classList.add('active-expense');
+  else el.classList.add('active');
+}
+
+// ── PAGINATION ──
+document.querySelectorAll('.page-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    if (this.querySelector('svg')) return;
+    this.closest('.pagination').querySelectorAll('.page-btn').forEach(b => {
+      if (!b.querySelector('svg')) b.classList.remove('active');
+    });
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

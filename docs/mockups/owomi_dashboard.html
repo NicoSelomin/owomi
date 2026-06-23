@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OWOMI — Tableau de bord</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --nuit:   #0C131E;
+  --nuit-d: #1A2235;
+  --nuit-c: #243047;
+  --or:     #D49E10;
+  --vert:   #1D9E75;
+  --corail: #D85A30;
+  --blanc:  #FFFFFF;
+  --gris:   #888780;
+  --fd:     'Sora', sans-serif;
+  --fb:     'Plus Jakarta Sans', sans-serif;
+}
+html, body { width:100%; min-height:100%; font-family:var(--fb); background:#F7F5F0; color:var(--nuit); }
+
+/* ══════════════════════════════════════════
+   SIDEBAR (desktop)
+══════════════════════════════════════════ */
+.sidebar {
+  position:fixed; top:0; left:0; bottom:0;
+  width:220px;
+  background:var(--nuit);
+  display:flex; flex-direction:column;
+  z-index:100;
+  padding:0 0 24px;
+}
+.sidebar-logo {
+  padding:24px 20px 20px;
+  border-bottom:.5px solid rgba(255,255,255,.06);
+  margin-bottom:8px;
+}
+.logo-mini { display:flex;align-items:center;gap:10px;text-decoration:none; }
+.logo-mark { width:34px;height:34px;border-radius:9px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.logo-inner { width:17px;height:17px;border-radius:50%;background:var(--nuit);display:flex;align-items:center;justify-content:center; }
+.logo-dot { width:6px;height:6px;border-radius:50%;background:var(--or); }
+.logo-name { font-family:var(--fd);font-size:18px;font-weight:700;color:var(--blanc);letter-spacing:.04em; }
+.logo-name span { color:var(--or); }
+
+.nav-section { padding:0 12px; margin-bottom:4px; }
+.nav-label { font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;padding:8px 8px 4px; }
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 10px; border-radius:9px;
+  font-size:13px; font-weight:500; color:rgba(255,255,255,.5);
+  text-decoration:none; cursor:pointer; transition:all .15s;
+  margin-bottom:2px;
+}
+.nav-item svg { width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0; }
+.nav-item:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.8); }
+.nav-item.active { background:rgba(212,158,16,.15); color:var(--or); }
+.nav-item.active svg { stroke:var(--or); }
+
+.sidebar-footer {
+  margin-top:auto;
+  padding:0 12px;
+  border-top:.5px solid rgba(255,255,255,.06);
+  padding-top:16px;
+}
+.user-card {
+  display:flex;align-items:center;gap:10px;
+  padding:10px;border-radius:9px;
+  background:rgba(255,255,255,.04);
+  border:.5px solid rgba(255,255,255,.07);
+}
+.avatar {
+  width:32px;height:32px;border-radius:50%;
+  background:var(--or);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:13px;font-weight:700;color:var(--nuit);
+  flex-shrink:0;
+}
+.user-info { flex:1;min-width:0; }
+.user-name { font-size:12px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.user-devise { font-size:10px;color:rgba(255,255,255,.3); }
+.logout-btn { background:none;border:none;cursor:pointer;padding:4px; }
+.logout-btn svg { width:14px;height:14px;stroke:rgba(255,255,255,.25);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.logout-btn:hover svg { stroke:rgba(255,255,255,.6); }
+
+/* ══════════════════════════════════════════
+   TAB BAR (mobile/tablet)
+══════════════════════════════════════════ */
+.tab-bar {
+  position:fixed; bottom:0; left:0; right:0;
+  height:60px;
+  background:var(--nuit);
+  display:flex; align-items:center;
+  border-top:.5px solid rgba(255,255,255,.06);
+  z-index:100;
+  padding:0 8px;
+}
+.tab-item {
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:6px 4px;border-radius:8px;
+  font-size:10px;font-weight:500;color:rgba(255,255,255,.4);
+  cursor:pointer;transition:all .15s;text-decoration:none;
+}
+.tab-item svg { width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.tab-item.active { color:var(--or); }
+.tab-item.active svg { stroke:var(--or); }
+.tab-fab {
+  width:48px;height:48px;border-radius:50%;
+  background:var(--or);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0; margin:0 8px;
+  box-shadow:0 4px 16px rgba(212,158,16,.35);
+}
+.tab-fab svg { width:22px;height:22px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round; }
+
+/* ══════════════════════════════════════════
+   TOP BAR (mobile/tablet)
+══════════════════════════════════════════ */
+.top-bar {
+  position:fixed;top:0;left:0;right:0;
+  height:56px;
+  background:var(--nuit);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+  z-index:99;
+  border-bottom:.5px solid rgba(255,255,255,.06);
+}
+.top-bar-logo { display:flex;align-items:center;gap:8px; }
+.top-bar-right { display:flex;align-items:center;gap:12px; }
+.top-avatar { width:32px;height:32px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:12px;font-weight:700;color:var(--nuit); }
+.notif-btn { background:none;border:none;cursor:pointer;position:relative; }
+.notif-btn svg { width:20px;height:20px;stroke:rgba(255,255,255,.5);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.notif-dot { position:absolute;top:0;right:0;width:7px;height:7px;border-radius:50%;background:var(--corail);border:1.5px solid var(--nuit); }
+
+/* ══════════════════════════════════════════
+   MAIN CONTENT
+══════════════════════════════════════════ */
+.main { padding:24px 20px 80px; }
+
+/* Page header */
+.page-header { margin-bottom:20px; }
+.page-greeting { font-size:13px;color:var(--gris);margin-bottom:2px; }
+.page-title { font-family:var(--fd);font-size:22px;font-weight:700;color:var(--nuit); }
+
+/* Période selector */
+.period-tabs {
+  display:flex;gap:6px;margin-bottom:20px;
+  background:rgba(0,0,0,.06);border-radius:10px;padding:4px;
+  width:fit-content;
+}
+.period-tab {
+  padding:6px 14px;border-radius:7px;font-size:12px;font-weight:500;
+  color:var(--gris);cursor:pointer;transition:all .15s;border:none;background:none;
+}
+.period-tab.active { background:var(--blanc);color:var(--nuit);box-shadow:0 1px 4px rgba(0,0,0,.1); }
+
+/* ── CARTE SOLDE ── */
+.balance-card {
+  background:var(--nuit);border-radius:18px;padding:22px;margin-bottom:16px;
+  position:relative;overflow:hidden;
+}
+.balance-card::after {
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:140px;height:140px;border-radius:50%;
+  background:rgba(212,158,16,.06);
+}
+.balance-accent { width:28px;height:3px;background:var(--or);border-radius:2px;margin-bottom:12px; }
+.balance-label { font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px; }
+.balance-amount { font-family:var(--fd);font-size:34px;font-weight:700;color:var(--blanc);margin-bottom:4px;line-height:1.1; }
+.balance-sub { font-size:12px;color:rgba(255,255,255,.3);margin-bottom:16px; }
+.balance-pills { display:flex;gap:10px; }
+.balance-pill { flex:1;background:rgba(255,255,255,.06);border-radius:10px;padding:10px 12px; }
+.pill-label { font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px; }
+.pill-value { font-family:var(--fd);font-size:15px;font-weight:600; }
+.pill-value.income { color:#5DCAA5; }
+.pill-value.expense { color:#F0997B; }
+
+/* ── STAT CARDS ── */
+.stat-row { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px; }
+.stat-card { background:var(--blanc);border-radius:14px;padding:14px 16px;border:.5px solid rgba(0,0,0,.06); }
+.stat-icon { width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0; }
+.stat-icon svg { width:16px;height:16px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.stat-icon.income { background:#E1F5EE; }
+.stat-icon.income svg { stroke:var(--vert); }
+.stat-icon.expense { background:#FAECE7; }
+.stat-icon.expense svg { stroke:var(--corail); }
+.stat-label { font-size:11px;color:var(--gris);margin-bottom:3px; }
+.stat-value { font-family:var(--fd);font-size:18px;font-weight:700; }
+.stat-value.income { color:var(--vert); }
+.stat-value.expense { color:var(--corail); }
+.stat-count { font-size:11px;color:var(--gris);margin-top:2px; }
+
+/* ── GRAPHIQUE ── */
+.chart-card { background:var(--blanc);border-radius:14px;padding:16px;margin-bottom:16px;border:.5px solid rgba(0,0,0,.06); }
+.card-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:14px; }
+.card-title { font-size:14px;font-weight:600;color:var(--nuit); }
+.card-badge { font-size:11px;color:var(--gris);background:#F2F0EB;padding:3px 10px;border-radius:20px; }
+
+/* ── DONUT ── */
+.donut-wrap { display:flex;align-items:center;gap:16px; }
+.donut-canvas { width:100px!important;height:100px!important;flex-shrink:0; }
+.donut-legend { flex:1;display:flex;flex-direction:column;gap:8px; }
+.legend-item { display:flex;align-items:center;gap:8px; }
+.legend-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+.legend-label { font-size:12px;color:var(--gris);flex:1; }
+.legend-pct { font-size:12px;font-weight:600;color:var(--nuit); }
+
+/* ── TRANSACTIONS ── */
+.tx-list { background:var(--blanc);border-radius:14px;padding:16px;border:.5px solid rgba(0,0,0,.06); }
+.tx-item { display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:.5px solid #F2F0EB; }
+.tx-item:last-child { border-bottom:none;padding-bottom:0; }
+.tx-icon { width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.tx-icon svg { width:16px;height:16px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.tx-icon.income { background:#E1F5EE; }
+.tx-icon.income svg { stroke:#0F6E56; }
+.tx-icon.expense { background:#FAECE7; }
+.tx-icon.expense svg { stroke:#993C1D; }
+.tx-info { flex:1;min-width:0; }
+.tx-name { font-size:13px;font-weight:500;color:var(--nuit);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tx-meta { font-size:11px;color:var(--gris);margin-top:1px; }
+.tx-amount { font-family:var(--fd);font-size:14px;font-weight:600;flex-shrink:0; }
+.tx-amount.income { color:var(--vert); }
+.tx-amount.expense { color:var(--corail); }
+
+.see-all { display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:13px;font-weight:500;color:var(--or);cursor:pointer;text-decoration:none; }
+.see-all svg { width:14px;height:14px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE LAYOUTS
+══════════════════════════════════════════ */
+
+/* MOBILE */
+.layout-mobile { display:block; }
+.layout-mobile .main { padding-top:72px; }
+
+/* TABLET */
+.layout-tablet { display:none; }
+
+/* DESKTOP */
+.layout-desktop { display:none; }
+
+@media (min-width:640px) and (max-width:1023px) {
+  .layout-mobile { display:none; }
+  .layout-tablet { display:block; }
+  .layout-desktop { display:none; }
+}
+@media (min-width:1024px) {
+  .layout-mobile { display:none; }
+  .layout-tablet { display:none; }
+  .layout-desktop { display:block; }
+}
+
+/* ── TABLET SPECIFICS ── */
+.layout-tablet .main {
+  padding:80px 24px 80px;
+  max-width:720px; margin:0 auto;
+}
+.layout-tablet .stat-row { grid-template-columns:1fr 1fr; }
+
+/* ── DESKTOP SPECIFICS ── */
+.layout-desktop .app-shell {
+  display:flex; min-height:100vh;
+}
+.layout-desktop .sidebar { display:flex; }
+.layout-desktop .content-area {
+  margin-left:220px;
+  flex:1;
+  padding:32px;
+  min-height:100vh;
+}
+.layout-desktop .top-bar { display:none; }
+.layout-desktop .tab-bar { display:none; }
+.layout-desktop .desktop-header {
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:24px;
+}
+.layout-desktop .desktop-grid {
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+}
+.layout-desktop .left-col { display:flex;flex-direction:column;gap:16px; }
+.layout-desktop .right-col { display:flex;flex-direction:column;gap:16px; }
+.layout-desktop .stat-row { grid-template-columns:1fr 1fr; }
+.layout-desktop .balance-amount { font-size:40px; }
+
+/* FAB desktop */
+.fab-desktop {
+  position:fixed;bottom:32px;right:32px;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--or);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(212,158,16,.4);
+  transition:transform .15s,box-shadow .15s;
+  z-index:50;
+}
+.fab-desktop:hover { transform:scale(1.08);box-shadow:0 6px 24px rgba(212,158,16,.5); }
+.fab-desktop svg { width:22px;height:22px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round; }
+
+/* Notification badge desktop */
+.notif-desktop { position:relative;background:none;border:none;cursor:pointer;padding:8px;border-radius:9px;transition:background .15s; }
+.notif-desktop:hover { background:rgba(0,0,0,.06); }
+.notif-desktop svg { width:20px;height:20px;stroke:var(--gris);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.notif-desktop .notif-dot { position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--corail);border:1.5px solid #F7F5F0; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MOBILE                               -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-mobile">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-bar-logo">
+      <div class="logo-mark" style="width:28px;height:28px;border-radius:8px"><div class="logo-inner" style="width:14px;height:14px"><div class="logo-dot" style="width:5px;height:5px"></div></div></div>
+      <span class="logo-name" style="font-size:16px">OWO<span>MI</span></span>
+    </div>
+    <div class="top-bar-right">
+      <button class="notif-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="notif-dot"></div></button>
+      <div class="top-avatar">VN</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="main">
+    <div class="page-header">
+      <div class="page-greeting">Bonjour, Nicodème 👋</div>
+      <div class="page-title">Tableau de bord</div>
+    </div>
+
+    <!-- Période -->
+    <div class="period-tabs">
+      <button class="period-tab">Jan</button>
+      <button class="period-tab">Mar</button>
+      <button class="period-tab">Avr</button>
+      <button class="period-tab active">Juin</button>
+    </div>
+
+    <!-- Carte solde -->
+    <div class="balance-card">
+      <div class="balance-accent"></div>
+      <div class="balance-label">Solde du mois</div>
+      <div class="balance-amount">87 500 FCFA</div>
+      <div class="balance-sub">Juin 2026 · 14 transactions</div>
+      <div class="balance-pills">
+        <div class="balance-pill"><div class="pill-label">Revenus</div><div class="pill-value income">+235 000</div></div>
+        <div class="balance-pill"><div class="pill-label">Dépenses</div><div class="pill-value expense">−147 500</div></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+        <div class="stat-label">Entrées</div>
+        <div class="stat-value income">235 000</div>
+        <div class="stat-count">6 transactions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon expense"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="stat-label">Sorties</div>
+        <div class="stat-value expense">147 500</div>
+        <div class="stat-count">8 transactions</div>
+      </div>
+    </div>
+
+    <!-- Graphique barres -->
+    <div class="chart-card">
+      <div class="card-header">
+        <span class="card-title">Évolution mensuelle</span>
+        <span class="card-badge">6 mois</span>
+      </div>
+      <canvas id="barChart-m" height="140"></canvas>
+    </div>
+
+    <!-- Graphique donut -->
+    <div class="chart-card">
+      <div class="card-header">
+        <span class="card-title">Répartition</span>
+        <span class="card-badge">Juin</span>
+      </div>
+      <div class="donut-wrap">
+        <canvas class="donut-canvas" id="donutChart-m"></canvas>
+        <div class="donut-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#D85A30"></div><span class="legend-label">Alimentation</span><span class="legend-pct">32%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div><span class="legend-label">Logement</span><span class="legend-pct">28%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#D49E10"></div><span class="legend-label">Transport</span><span class="legend-pct">18%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div><span class="legend-label">Loisirs</span><span class="legend-pct">14%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#888780"></div><span class="legend-label">Autres</span><span class="legend-pct">8%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions récentes -->
+    <div class="tx-list">
+      <div class="card-header"><span class="card-title">Transactions récentes</span></div>
+      <div class="tx-item">
+        <div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+        <div class="tx-info"><div class="tx-name">Salaire juin</div><div class="tx-meta">Revenus · 01 juin</div></div>
+        <div class="tx-amount income">+200 000</div>
+      </div>
+      <div class="tx-item">
+        <div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+        <div class="tx-info"><div class="tx-name">Courses Erevan</div><div class="tx-meta">Alimentation · 03 juin</div></div>
+        <div class="tx-amount expense">−18 500</div>
+      </div>
+      <div class="tx-item">
+        <div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+        <div class="tx-info"><div class="tx-name">Freelance design</div><div class="tx-meta">Revenus · 05 juin</div></div>
+        <div class="tx-amount income">+35 000</div>
+      </div>
+      <div class="tx-item">
+        <div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+        <div class="tx-info"><div class="tx-name">Loyer juillet</div><div class="tx-meta">Logement · 07 juin</div></div>
+        <div class="tx-amount expense">−45 000</div>
+      </div>
+      <div class="tx-item">
+        <div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <div class="tx-info"><div class="tx-name">Abonnement internet</div><div class="tx-meta">Loisirs · 10 juin</div></div>
+        <div class="tx-amount expense">−12 000</div>
+      </div>
+      <a href="#" class="see-all">Voir toutes les transactions <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <a href="#" class="tab-item active">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Accueil
+    </a>
+    <a href="#" class="tab-item">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Transactions
+    </a>
+    <button class="tab-fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <a href="#" class="tab-item">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Rapports
+    </a>
+    <a href="#" class="tab-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+      Profil
+    </a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- TABLET                               -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-tablet">
+  <div class="top-bar">
+    <div class="top-bar-logo">
+      <div class="logo-mark" style="width:30px;height:30px;border-radius:9px"><div class="logo-inner" style="width:15px;height:15px"><div class="logo-dot" style="width:6px;height:6px"></div></div></div>
+      <span class="logo-name">OWO<span>MI</span></span>
+    </div>
+    <div class="top-bar-right">
+      <button class="notif-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="notif-dot"></div></button>
+      <div class="top-avatar">VN</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="page-header">
+      <div class="page-greeting">Bonjour, Nicodème 👋</div>
+      <div class="page-title">Tableau de bord</div>
+    </div>
+    <div class="period-tabs">
+      <button class="period-tab">Jan</button><button class="period-tab">Mar</button>
+      <button class="period-tab">Avr</button><button class="period-tab active">Juin</button>
+    </div>
+    <div class="balance-card">
+      <div class="balance-accent"></div>
+      <div class="balance-label">Solde du mois</div>
+      <div class="balance-amount">87 500 FCFA</div>
+      <div class="balance-sub">Juin 2026 · 14 transactions</div>
+      <div class="balance-pills">
+        <div class="balance-pill"><div class="pill-label">Revenus</div><div class="pill-value income">+235 000</div></div>
+        <div class="balance-pill"><div class="pill-label">Dépenses</div><div class="pill-value expense">−147 500</div></div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+        <div class="stat-label">Entrées du mois</div>
+        <div class="stat-value income">235 000 FCFA</div>
+        <div class="stat-count">6 transactions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon expense"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="stat-label">Sorties du mois</div>
+        <div class="stat-value expense">147 500 FCFA</div>
+        <div class="stat-count">8 transactions</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="chart-card">
+        <div class="card-header"><span class="card-title">Évolution</span><span class="card-badge">6 mois</span></div>
+        <canvas id="barChart-t" height="160"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-header"><span class="card-title">Répartition</span><span class="card-badge">Juin</span></div>
+        <div class="donut-wrap" style="flex-direction:column;align-items:flex-start;gap:10px">
+          <canvas class="donut-canvas" id="donutChart-t"></canvas>
+          <div class="donut-legend" style="width:100%">
+            <div class="legend-item"><div class="legend-dot" style="background:#D85A30"></div><span class="legend-label">Alimentation</span><span class="legend-pct">32%</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div><span class="legend-label">Logement</span><span class="legend-pct">28%</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#D49E10"></div><span class="legend-label">Transport</span><span class="legend-pct">18%</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div><span class="legend-label">Loisirs</span><span class="legend-pct">14%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tx-list" style="margin-top:16px">
+      <div class="card-header"><span class="card-title">Transactions récentes</span><a href="#" style="font-size:12px;color:var(--or);text-decoration:none">Voir tout</a></div>
+      <div class="tx-item"><div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="tx-info"><div class="tx-name">Salaire juin</div><div class="tx-meta">Revenus · 01 juin 2026</div></div><div class="tx-amount income">+200 000 FCFA</div></div>
+      <div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><div class="tx-info"><div class="tx-name">Courses Erevan Market</div><div class="tx-meta">Alimentation · 03 juin 2026</div></div><div class="tx-amount expense">−18 500 FCFA</div></div>
+      <div class="tx-item"><div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="tx-info"><div class="tx-name">Freelance design</div><div class="tx-meta">Revenus · 05 juin 2026</div></div><div class="tx-amount income">+35 000 FCFA</div></div>
+      <div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="tx-info"><div class="tx-name">Loyer juillet</div><div class="tx-meta">Logement · 07 juin 2026</div></div><div class="tx-amount expense">−45 000 FCFA</div></div>
+      <div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="tx-info"><div class="tx-name">Abonnement internet</div><div class="tx-meta">Loisirs · 10 juin 2026</div></div><div class="tx-amount expense">−12 000 FCFA</div></div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <a href="#" class="tab-item active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Accueil</a>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+    <button class="tab-fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>Profil</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- DESKTOP                              -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-desktop">
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <a href="owomi_splash.html" class="logo-mini">
+          <div class="logo-mark"><div class="logo-inner"><div class="logo-dot"></div></div></div>
+          <div class="logo-name">OWO<span>MI</span></div>
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Principal</div>
+        <a href="#" class="nav-item active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Tableau de bord</a>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Gestion</div>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Catégories</a>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M4.93 4.93a10 10 0 000 14.14"/></svg>Paramètres</a>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="avatar">VN</div>
+          <div class="user-info">
+            <div class="user-name">Nicodème V.</div>
+            <div class="user-devise">XOF — FCFA</div>
+          </div>
+          <button class="logout-btn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content-area">
+      <div class="desktop-header">
+        <div>
+          <div class="page-greeting">Bonjour, Nicodème 👋</div>
+          <div class="page-title">Tableau de bord</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="period-tabs" style="margin-bottom:0">
+            <button class="period-tab">Jan</button><button class="period-tab">Mar</button>
+            <button class="period-tab">Avr</button><button class="period-tab active">Juin</button>
+          </div>
+          <button class="notif-desktop"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="notif-dot"></div></button>
+        </div>
+      </div>
+
+      <div class="desktop-grid">
+        <div class="left-col">
+          <div class="balance-card">
+            <div class="balance-accent"></div>
+            <div class="balance-label">Solde du mois</div>
+            <div class="balance-amount">87 500 FCFA</div>
+            <div class="balance-sub">Juin 2026 · 14 transactions</div>
+            <div class="balance-pills">
+              <div class="balance-pill"><div class="pill-label">Revenus</div><div class="pill-value income">+235 000 FCFA</div></div>
+              <div class="balance-pill"><div class="pill-label">Dépenses</div><div class="pill-value expense">−147 500 FCFA</div></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="stat-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+              <div class="stat-label">Entrées du mois</div>
+              <div class="stat-value income">235 000 FCFA</div>
+              <div class="stat-count">6 transactions</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon expense"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+              <div class="stat-label">Sorties du mois</div>
+              <div class="stat-value expense">147 500 FCFA</div>
+              <div class="stat-count">8 transactions</div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="card-header"><span class="card-title">Évolution mensuelle</span><span class="card-badge">6 derniers mois</span></div>
+            <canvas id="barChart-d" height="120"></canvas>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div class="chart-card">
+            <div class="card-header"><span class="card-title">Répartition</span><span class="card-badge">Juin 2026</span></div>
+            <div style="display:flex;justify-content:center;margin-bottom:12px">
+              <canvas style="width:120px!important;height:120px!important" id="donutChart-d"></canvas>
+            </div>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#D85A30"></div><span class="legend-label">Alimentation</span><span class="legend-pct">32%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div><span class="legend-label">Logement</span><span class="legend-pct">28%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#D49E10"></div><span class="legend-label">Transport</span><span class="legend-pct">18%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div><span class="legend-label">Loisirs</span><span class="legend-pct">14%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#888780"></div><span class="legend-label">Autres</span><span class="legend-pct">8%</span></div>
+            </div>
+          </div>
+          <div class="tx-list">
+            <div class="card-header"><span class="card-title">Récentes</span><a href="#" style="font-size:12px;color:var(--or);text-decoration:none">Voir tout →</a></div>
+            <div class="tx-item"><div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="tx-info"><div class="tx-name">Salaire juin</div><div class="tx-meta">01 juin · Revenus</div></div><div class="tx-amount income">+200 000</div></div>
+            <div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><div class="tx-info"><div class="tx-name">Courses Erevan</div><div class="tx-meta">03 juin · Alimentation</div></div><div class="tx-amount expense">−18 500</div></div>
+            <div class="tx-item"><div class="tx-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="tx-info"><div class="tx-name">Freelance design</div><div class="tx-meta">05 juin · Revenus</div></div><div class="tx-amount income">+35 000</div></div>
+            <div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="tx-info"><div class="tx-name">Loyer juillet</div><div class="tx-meta">07 juin · Logement</div></div><div class="tx-amount expense">−45 000</div></div>
+            <div class="tx-item"><div class="tx-icon expense"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="tx-info"><div class="tx-name">Abonnement internet</div><div class="tx-meta">10 juin · Loisirs</div></div><div class="tx-amount expense">−12 000</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="fab-desktop"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+</div>
+
+<script>
+const barData = {
+  labels: ['Jan','Fév','Mar','Avr','Mai','Juin'],
+  income:  [180000,210000,195000,220000,185000,235000],
+  expense: [120000,145000,130000,160000,140000,147500],
+};
+const donutData = {
+  labels: ['Alimentation','Logement','Transport','Loisirs','Autres'],
+  data: [32,28,18,14,8],
+  colors: ['#D85A30','#185FA5','#D49E10','#1D9E75','#888780'],
+};
+
+function makeBar(id) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: barData.labels,
+      datasets:[
+        { label:'Entrées', data:barData.income,  backgroundColor:'rgba(29,158,117,.7)',  borderRadius:4, borderSkipped:false },
+        { label:'Sorties', data:barData.expense, backgroundColor:'rgba(216,90,48,.65)',  borderRadius:4, borderSkipped:false },
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()+' FCFA' } } },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:'#888780', font:{ size:11 } } },
+        y:{ grid:{ color:'rgba(0,0,0,.05)' }, ticks:{ color:'#888780', font:{ size:11 }, callback: v => (v/1000)+'k' } }
+      }
+    }
+  });
+}
+
+function makeDonut(id) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels:donutData.labels, datasets:[{ data:donutData.data, backgroundColor:donutData.colors, borderWidth:0, hoverOffset:4 }] },
+    options:{
+      responsive:false, cutout:'72%',
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ctx.label+': '+ctx.parsed+'%' } } }
+    }
+  });
+}
+
+makeBar('barChart-m'); makeBar('barChart-t'); makeBar('barChart-d');
+makeDonut('donutChart-m'); makeDonut('donutChart-t'); makeDonut('donutChart-d');
+
+// Period tabs
+document.querySelectorAll('.period-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    this.closest('.period-tabs').querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

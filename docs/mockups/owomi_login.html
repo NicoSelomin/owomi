@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OWOMI — Se connecter</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --nuit:   #0C131E;
+  --nuit-d: #1A2235;
+  --nuit-c: #243047;
+  --or:     #D49E10;
+  --vert:   #1D9E75;
+  --rouge:  #E24B4A;
+  --blanc:  #FFFFFF;
+  --fd:     'Sora', sans-serif;
+  --fb:     'Plus Jakarta Sans', sans-serif;
+}
+html, body { width:100%; min-height:100%; font-family:var(--fb); background:var(--nuit); color:var(--blanc); }
+
+.deco { position:fixed; border-radius:50%; pointer-events:none; z-index:0; }
+.deco-1 { width:400px;height:400px;background:rgba(212,158,16,.05);top:-100px;right:-100px; }
+.deco-2 { width:250px;height:250px;background:rgba(29,158,117,.04);bottom:-60px;left:-60px; }
+.gold-bar { position:fixed;bottom:0;left:0;width:100%;height:3px;background:var(--or);z-index:10; }
+
+@keyframes fadeUp {
+  from { opacity:0;transform:translateY(14px); }
+  to   { opacity:1;transform:translateY(0); }
+}
+.a1{animation:fadeUp .45s ease both;}
+.a2{animation:fadeUp .45s .08s ease both;}
+.a3{animation:fadeUp .45s .16s ease both;}
+.a4{animation:fadeUp .45s .24s ease both;}
+
+/* ── LOGO ── */
+.logo-mini { display:flex;align-items:center;gap:10px;text-decoration:none; }
+.logo-mark-sm { width:36px;height:36px;border-radius:10px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.logo-inner-sm { width:18px;height:18px;border-radius:50%;background:var(--nuit);display:flex;align-items:center;justify-content:center; }
+.logo-dot-sm { width:7px;height:7px;border-radius:50%;background:var(--or); }
+.logo-name { font-family:var(--fd);font-size:20px;font-weight:700;color:var(--blanc);letter-spacing:.04em; }
+.logo-name span { color:var(--or); }
+
+/* ── FORM CARD ── */
+.form-card { background:var(--nuit-d);border:.5px solid rgba(255,255,255,.08);border-radius:20px;padding:36px 32px;width:100%; }
+.form-title { font-family:var(--fd);font-size:24px;font-weight:700;color:var(--blanc);margin-bottom:4px; }
+.form-sub { font-size:13px;color:rgba(255,255,255,.4);margin-bottom:28px; }
+
+/* ── FORM ELEMENTS ── */
+.form-group { display:flex;flex-direction:column;gap:5px;margin-bottom:14px; }
+label { font-size:13px;font-weight:500;color:rgba(255,255,255,.65); }
+.label-row { display:flex;justify-content:space-between;align-items:center; }
+.label-row a { font-size:12px;color:var(--or);text-decoration:none; }
+.label-row a:hover { text-decoration:underline; }
+
+/* ── INPUTS ── */
+.input-wrap { position:relative; }
+.input-icon {
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;
+  stroke:rgba(255,255,255,.3);fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+  pointer-events:none;
+}
+.input-wrap input {
+  width:100%;height:46px;
+  background:var(--nuit-c);
+  border:.5px solid rgba(255,255,255,.1);
+  border-radius:10px;
+  color:var(--blanc);
+  font-family:var(--fb);font-size:14px;
+  padding:0 12px 0 38px;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.input-wrap input::placeholder { color:rgba(255,255,255,.2); }
+.input-wrap input:focus {
+  border-color:var(--or);
+  box-shadow:0 0 0 3px rgba(212,158,16,.15);
+}
+.input-wrap input.err { border-color:var(--rouge); box-shadow:0 0 0 3px rgba(226,75,74,.12); }
+.input-wrap input.ok  { border-color:var(--vert);  box-shadow:0 0 0 3px rgba(29,158,117,.12); }
+
+/* ── EYE BUTTON ── */
+.eye-btn {
+  position:absolute;right:0;top:0;
+  width:44px;height:46px;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:none;cursor:pointer;border-radius:0 10px 10px 0;
+}
+.eye-btn svg { width:16px;height:16px;stroke:rgba(255,255,255,.3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none; }
+.eye-btn:hover svg { stroke:rgba(255,255,255,.6); }
+.input-wrap input.pwd-field { padding-right:44px; }
+
+/* ── HINT ── */
+.hint { font-size:11px;color:rgba(255,255,255,.3); }
+.hint.err { color:#F09595; }
+.hint.ok  { color:#5DCAA5; }
+
+/* ── ALERT ERREUR GLOBALE ── */
+.alert-err {
+  display:none;
+  background:rgba(226,75,74,.1);
+  border:.5px solid rgba(226,75,74,.3);
+  border-radius:10px;
+  padding:12px 16px;
+  margin-bottom:16px;
+  font-size:13px;
+  color:#F09595;
+  display:flex;align-items:center;gap:10px;
+}
+.alert-err svg { width:16px;height:16px;stroke:#F09595;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0; }
+.alert-err.hidden { display:none; }
+
+/* ── REMEMBER ME ── */
+.remember-row { display:flex;align-items:center;gap:8px;margin-bottom:4px; }
+.remember-row input[type="checkbox"] {
+  width:16px;height:16px;
+  accent-color:var(--or);
+  cursor:pointer;
+}
+.remember-row label { font-size:13px;color:rgba(255,255,255,.5);cursor:pointer;margin-bottom:0; }
+
+/* ── DIVIDER ── */
+.divider { display:flex;align-items:center;gap:10px;margin:18px 0; }
+.divider-line { flex:1;height:.5px;background:rgba(255,255,255,.08); }
+.divider span { font-size:12px;color:rgba(255,255,255,.25); }
+
+/* ── BOUTONS ── */
+.btn-submit {
+  width:100%;height:50px;border-radius:12px;
+  background:var(--or);color:var(--nuit);
+  font-family:var(--fb);font-size:15px;font-weight:600;
+  border:none;cursor:pointer;
+  transition:opacity .15s,transform .1s;
+  margin-top:4px;
+}
+.btn-submit:hover { opacity:.9; }
+.btn-submit:active { transform:scale(.98); }
+.btn-submit.loading { opacity:.7;cursor:not-allowed; }
+
+.btn-google {
+  width:100%;height:46px;border-radius:12px;
+  background:var(--nuit-c);color:rgba(255,255,255,.7);
+  font-family:var(--fb);font-size:14px;font-weight:500;
+  border:.5px solid rgba(255,255,255,.1);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:background .15s;
+}
+.btn-google:hover { background:rgba(255,255,255,.06); }
+.btn-google svg { width:18px;height:18px;flex-shrink:0; }
+
+/* ── LINKS ── */
+.register-link { text-align:center;font-size:13px;color:rgba(255,255,255,.4);margin-top:18px; }
+.register-link a { color:var(--or);text-decoration:none;font-weight:500; }
+.register-link a:hover { text-decoration:underline; }
+
+/* ── INFO PANEL ── */
+.info-panel { background:rgba(255,255,255,.02);border-right:.5px solid rgba(255,255,255,.05);display:flex;flex-direction:column;justify-content:center;padding:64px 48px;gap:32px; }
+.info-headline { font-family:var(--fd);font-size:30px;font-weight:700;line-height:1.3; }
+.info-headline span { color:var(--or); }
+.info-desc { font-size:13px;color:rgba(255,255,255,.4);line-height:1.75; }
+
+/* Carte stats simulée */
+.stat-cards { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+.stat-card { background:var(--nuit-d);border:.5px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px; }
+.stat-label { font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px; }
+.stat-value { font-family:var(--fd);font-size:22px;font-weight:700;color:var(--blanc); }
+.stat-value.income { color:#5DCAA5; }
+.stat-value.expense { color:#F0997B; }
+.stat-value.balance { color:var(--or); }
+
+/* Mini transaction preview */
+.tx-preview { display:flex;flex-direction:column;gap:6px;margin-top:4px; }
+.tx-item { background:var(--nuit-d);border:.5px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px; }
+.tx-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+.tx-dot.in  { background:var(--vert); }
+.tx-dot.out { background:var(--rouge); }
+.tx-info { flex:1; }
+.tx-name { font-size:12px;color:rgba(255,255,255,.7); }
+.tx-date { font-size:10px;color:rgba(255,255,255,.3); }
+.tx-amount { font-family:var(--fd);font-size:13px;font-weight:600; }
+.tx-amount.in  { color:#5DCAA5; }
+.tx-amount.out { color:#F0997B; }
+
+.info-note { font-size:11px;color:rgba(255,255,255,.18);padding-top:20px;border-top:.5px solid rgba(255,255,255,.06); }
+
+/* ── LAYOUTS ── */
+.layout-mobile { min-height:100vh;position:relative;z-index:1;padding:24px 20px 48px;display:flex;flex-direction:column;gap:20px; }
+.layout-tablet { display:none;min-height:100vh;position:relative;z-index:1;padding:32px 24px 48px;flex-direction:column;align-items:center;gap:20px; }
+.layout-tablet .form-card { max-width:480px; }
+.layout-desktop { display:none;min-height:100vh;position:relative;z-index:1; }
+.desktop-grid { display:grid;grid-template-columns:1fr 1fr;min-height:100vh; }
+.desktop-form-col { display:flex;flex-direction:column;justify-content:center;align-items:center;padding:48px 40px;overflow-y:auto; }
+.desktop-form-col .form-card { max-width:420px;width:100%; }
+
+@media (min-width:640px) and (max-width:1023px) {
+  .layout-mobile { display:none; }
+  .layout-tablet { display:flex; }
+}
+@media (min-width:1024px) {
+  .layout-mobile { display:none; }
+  .layout-tablet { display:none; }
+  .layout-desktop { display:block; }
+}
+</style>
+</head>
+<body>
+
+<div class="deco deco-1"></div>
+<div class="deco deco-2"></div>
+<div class="gold-bar"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MOBILE                               -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-mobile">
+  <a href="owomi_splash.html" class="logo-mini a1">
+    <div class="logo-mark-sm"><div class="logo-inner-sm"><div class="logo-dot-sm"></div></div></div>
+    <div class="logo-name">OWO<span>MI</span></div>
+  </a>
+
+  <div class="form-card a2">
+    <div class="form-title">Bon retour 👋</div>
+    <div class="form-sub">Connectez-vous à votre compte OWOMI.</div>
+
+    <!-- Alerte erreur globale -->
+    <div class="alert-err hidden" id="alert-m">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Email ou mot de passe incorrect.
+    </div>
+
+    <div class="form-group">
+      <label>Adresse email</label>
+      <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <input type="email" placeholder="jean@email.com" id="email-m">
+      </div>
+      <span class="hint" id="email-hint-m"></span>
+    </div>
+
+    <div class="form-group">
+      <div class="label-row">
+        <label>Mot de passe</label>
+        <a href="#">Mot de passe oublié ?</a>
+      </div>
+      <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <input type="password" placeholder="Votre mot de passe" id="pwd-m" class="pwd-field">
+        <button class="eye-btn" type="button" onclick="togglePwd('pwd-m',this)">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <span class="hint" id="pwd-hint-m"></span>
+    </div>
+
+    <div class="remember-row">
+      <input type="checkbox" id="remember-m">
+      <label for="remember-m">Se souvenir de moi</label>
+    </div>
+
+    <button class="btn-submit" onclick="handleLogin('m')">Se connecter</button>
+
+    <div class="divider"><div class="divider-line"></div><span>ou</span><div class="divider-line"></div></div>
+
+    <button class="btn-google">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continuer avec Google
+    </button>
+  </div>
+
+  <div class="register-link a3">Pas encore de compte ? <a href="owomi_register.html">S'inscrire gratuitement</a></div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- TABLET                               -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-tablet">
+  <a href="owomi_splash.html" class="logo-mini a1">
+    <div class="logo-mark-sm"><div class="logo-inner-sm"><div class="logo-dot-sm"></div></div></div>
+    <div class="logo-name">OWO<span>MI</span></div>
+  </a>
+
+  <div class="form-card a2">
+    <div class="form-title">Bon retour 👋</div>
+    <div class="form-sub">Connectez-vous à votre compte OWOMI.</div>
+
+    <div class="alert-err hidden" id="alert-t">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Email ou mot de passe incorrect.
+    </div>
+
+    <div class="form-group">
+      <label>Adresse email</label>
+      <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <input type="email" placeholder="jean@email.com" id="email-t">
+      </div>
+      <span class="hint" id="email-hint-t"></span>
+    </div>
+
+    <div class="form-group">
+      <div class="label-row">
+        <label>Mot de passe</label>
+        <a href="#">Mot de passe oublié ?</a>
+      </div>
+      <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <input type="password" placeholder="Votre mot de passe" id="pwd-t" class="pwd-field">
+        <button class="eye-btn" type="button" onclick="togglePwd('pwd-t',this)">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="remember-row">
+      <input type="checkbox" id="remember-t">
+      <label for="remember-t">Se souvenir de moi</label>
+    </div>
+
+    <button class="btn-submit" onclick="handleLogin('t')">Se connecter</button>
+    <div class="divider"><div class="divider-line"></div><span>ou</span><div class="divider-line"></div></div>
+    <button class="btn-google">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continuer avec Google
+    </button>
+  </div>
+  <div class="register-link a3">Pas encore de compte ? <a href="owomi_register.html">S'inscrire gratuitement</a></div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- DESKTOP                              -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-desktop">
+  <div class="desktop-grid">
+
+    <!-- Gauche : aperçu produit -->
+    <div class="info-panel a1">
+      <a href="owomi_splash.html" class="logo-mini">
+        <div class="logo-mark-sm" style="width:40px;height:40px;border-radius:12px">
+          <div class="logo-inner-sm" style="width:20px;height:20px"><div class="logo-dot-sm" style="width:8px;height:8px"></div></div>
+        </div>
+        <div class="logo-name" style="font-size:22px">OWO<span>MI</span></div>
+      </a>
+
+      <div>
+        <div class="info-headline">Votre argent,<br><span>sous contrôle.</span></div>
+        <p class="info-desc" style="margin-top:10px">Retrouvez votre tableau de bord, vos transactions et vos rapports là où vous les aviez laissés.</p>
+      </div>
+
+      <!-- Carte solde simulée -->
+      <div style="background:var(--nuit);border-radius:14px;padding:18px 20px;border:.5px solid rgba(255,255,255,.08)">
+        <div style="width:28px;height:3px;background:var(--or);border-radius:2px;margin-bottom:10px"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Solde du mois</div>
+        <div style="font-family:var(--fd);font-size:28px;font-weight:700;color:var(--blanc)">87 500 FCFA</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.3);margin-bottom:12px">Juin 2026 · 14 transactions</div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;background:rgba(255,255,255,.05);border-radius:8px;padding:8px 10px">
+            <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:3px">Revenus</div>
+            <div style="font-family:var(--fd);font-size:14px;font-weight:600;color:#5DCAA5">+235 000</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,.05);border-radius:8px;padding:8px 10px">
+            <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:3px">Dépenses</div>
+            <div style="font-family:var(--fd);font-size:14px;font-weight:600;color:#F0997B">−147 500</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions récentes simulées -->
+      <div class="tx-preview">
+        <div style="font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">Dernières transactions</div>
+        <div class="tx-item">
+          <div class="tx-dot in"></div>
+          <div class="tx-info">
+            <div class="tx-name">Salaire juin</div>
+            <div class="tx-date">01 juin 2026 · Revenus</div>
+          </div>
+          <div class="tx-amount in">+200 000</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-dot out"></div>
+          <div class="tx-info">
+            <div class="tx-name">Courses Erevan Market</div>
+            <div class="tx-date">03 juin 2026 · Alimentation</div>
+          </div>
+          <div class="tx-amount out">−18 500</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-dot out"></div>
+          <div class="tx-info">
+            <div class="tx-name">Facture SBEE</div>
+            <div class="tx-date">05 juin 2026 · Logement</div>
+          </div>
+          <div class="tx-amount out">−12 000</div>
+        </div>
+      </div>
+
+      <div class="info-note">OWOMI v1.0 — Gratuit &amp; international — Cotonou, Bénin</div>
+    </div>
+
+    <!-- Droite : formulaire -->
+    <div class="desktop-form-col">
+      <div class="form-card a2">
+        <div class="form-title">Bon retour 👋</div>
+        <div class="form-sub">Connectez-vous à votre compte OWOMI.</div>
+
+        <div class="alert-err hidden" id="alert-d">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Email ou mot de passe incorrect.
+        </div>
+
+        <div class="form-group" style="margin-top:20px">
+          <label>Adresse email</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" placeholder="jean@email.com" id="email-d">
+          </div>
+          <span class="hint" id="email-hint-d"></span>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label>Mot de passe</label>
+            <a href="#">Mot de passe oublié ?</a>
+          </div>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <input type="password" placeholder="Votre mot de passe" id="pwd-d" class="pwd-field">
+            <button class="eye-btn" type="button" onclick="togglePwd('pwd-d',this)">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <span class="hint" id="pwd-hint-d"></span>
+        </div>
+
+        <div class="remember-row" style="margin-bottom:12px">
+          <input type="checkbox" id="remember-d" checked>
+          <label for="remember-d">Se souvenir de moi</label>
+        </div>
+
+        <button class="btn-submit" onclick="handleLogin('d')">Se connecter →</button>
+        <div class="divider"><div class="divider-line"></div><span>ou</span><div class="divider-line"></div></div>
+        <button class="btn-google">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continuer avec Google
+        </button>
+        <div class="register-link" style="margin-top:16px">Pas encore de compte ? <a href="owomi_register.html">S'inscrire gratuitement</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function togglePwd(id, btn) {
+  const input = document.getElementById(id);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.querySelector('svg').innerHTML = isHidden
+    ? '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+}
+
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+['m','t','d'].forEach(suffix => {
+  const emailEl = document.getElementById('email-' + suffix);
+  const hintEl  = document.getElementById('email-hint-' + suffix);
+  if (!emailEl || !hintEl) return;
+  emailEl.addEventListener('input', () => {
+    const val = emailEl.value.trim();
+    if (!val) { emailEl.className=''; hintEl.textContent=''; return; }
+    if (validateEmail(val)) {
+      emailEl.className='ok'; hintEl.textContent='✓ Email valide'; hintEl.className='hint ok';
+    } else {
+      emailEl.className='err'; hintEl.textContent='Format invalide'; hintEl.className='hint err';
+    }
+  });
+  emailEl.addEventListener('blur', () => {
+    const val = emailEl.value.trim();
+    if (val && !validateEmail(val)) {
+      emailEl.className='err';
+    }
+  });
+});
+
+function handleLogin(suffix) {
+  const emailEl = document.getElementById('email-' + suffix);
+  const pwdEl   = document.getElementById('pwd-' + suffix);
+  const alertEl = document.getElementById('alert-' + suffix);
+  const btn     = emailEl.closest('.form-card').querySelector('.btn-submit');
+
+  const email = emailEl ? emailEl.value.trim() : '';
+  const pwd   = pwdEl   ? pwdEl.value : '';
+  let valid = true;
+
+  if (!email || !validateEmail(email)) {
+    if (emailEl) emailEl.className = 'err';
+    valid = false;
+  }
+  if (!pwd || pwd.length < 1) {
+    if (pwdEl) pwdEl.className = 'pwd-field err';
+    valid = false;
+  }
+
+  if (!valid) {
+    if (alertEl) { alertEl.classList.remove('hidden'); alertEl.style.display='flex'; }
+    return;
+  }
+
+  // Simulation loading
+  btn.textContent = 'Connexion en cours…';
+  btn.classList.add('loading');
+  setTimeout(() => {
+    btn.textContent = suffix === 'd' ? 'Se connecter →' : 'Se connecter';
+    btn.classList.remove('loading');
+    if (alertEl) { alertEl.classList.remove('hidden'); alertEl.style.display='flex'; }
+    if (emailEl) emailEl.className = 'err';
+    if (pwdEl)   pwdEl.className   = 'pwd-field err';
+  }, 1200);
+}
+</script>
+</body>
+</html>
