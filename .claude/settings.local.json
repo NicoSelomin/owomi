@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(java -version)",
+      "Bash(mvn -version)",
+      "Bash(npm -v)",
+      "Bash(ng version *)",
+      "Bash(docker -v)",
+      "Bash(git --version)",
+      "Bash(npm install *)",
+      "Bash(./mvnw -B -q clean compile)",
+      "Bash(curl -s \"https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-parent/maven-metadata.xml\")",
+      "Bash(npx ng *)",
+      "Bash(docker context *)",
+      "Read(//run/**)",
+      "Bash(DOCKER_HOST=unix:///var/run/docker.sock docker ps)",
+      "Bash(systemctl is-active *)",
+      "Read(//usr/lib/**)",
+      "Bash(./mvnw -B -q clean package -DskipTests)",
+      "Bash(echo \"=== EXIT $? ===\")",
+      "Bash(curl -s -o /tmp/claude-1000/-home-vodounnou-ProProjects-OWOMI/c2b49185-321f-4d5c-907d-d4217a68687a/scratchpad/index.html -w \"HTTP %{http_code}\\\\n\" http://localhost:4200)",
+      "Bash(curl -s -o /dev/null -w \"main.js HTTP %{http_code}\\\\n\" http://localhost:4200/main.js)",
+      "Bash(pkill -f \"ng serve\")",
+      "Bash(pkill -f \"ng-dev-server\\\\|@angular-devkit\")",
+      "Bash(curl -s -o /dev/null -w \"frontend now: %{http_code}\\\\n\" --max-time 3 http://localhost:4200)",
+      "Bash(curl -s -w '\\\\n[HTTP %{http_code}]\\\\n' http://localhost:8080/api/users/me -H 'Authorization: Bearer __CMDSUB_OUTPUT__')",
+      "Bash(curl -s -w '\\\\n[HTTP %{http_code}]\\\\n' http://localhost:8080/api/users/me)",
+      "Bash(curl -s -w '\\\\n[HTTP %{http_code}]\\\\n' http://localhost:8080/api/health -H 'Authorization: Bearer __CMDSUB_OUTPUT__')",
+      "Bash(curl -s -w '\\\\n[HTTP %{http_code}]\\\\n' http://localhost:8080/api/health)",
+      "Bash(curl -s -w '\\\\n[HTTP %{http_code}]\\\\n' -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@owomi.dev\",\"password\":\"WrongPass1\"}')",
+      "Bash(./mvnw *)"
+    ]
+  }
+}

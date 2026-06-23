@@ -1,0 +1,28 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>OWOMI</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-subtitle>« mon argent » en Fon</ion-card-subtitle>
+      <ion-card-title>Bienvenue sur OWOMI</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>
+        Application de gestion de budget personnel, 100% gratuite et sans
+        publicité.
+      </p>
+
+      <ion-button expand="block" (click)="checkBackend()" [disabled]="isLoading()">
+        Vérifier la connexion au backend
+      </ion-button>
+
+      <ion-text>
+        <p class="owomi-amount">État : {{ status() }}</p>
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

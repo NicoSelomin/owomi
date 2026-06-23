@@ -1,0 +1,30 @@
+/* ============================================================
+   OWOMI — Styles globaux applicatifs
+   ============================================================ */
+
+/* --- Typographie de base --- */
+body {
+  font-family: var(--owomi-font-body);
+  color: var(--ion-text-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--owomi-font-display);
+  font-weight: 600;
+}
+
+.owomi-amount {
+  font-family: var(--owomi-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Badges sémantiques revenus / dépenses --- */
+.owomi-income {
+  background-color: var(--owomi-income-bg);
+  color: var(--owomi-income-text);
+}
+
+.owomi-expense {
+  background-color: var(--owomi-expense-bg);
+  color: var(--owomi-expense-text);
+}

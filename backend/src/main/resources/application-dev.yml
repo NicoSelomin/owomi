@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    # Affichage des requêtes SQL formatées en développement local uniquement
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Secret JWT de développement (256 bits, encodé Base64) — NE JAMAIS utiliser en production.
+# Surchargé par la variable d'environnement JWT_SECRET si elle est définie.
+jwt:
+  secret: ${JWT_SECRET:b3dvbWktZGV2LXNlY3JldC1rZXktbXVzdC1iZS1hdC1sZWFzdC0yNTYtYml0cy1sb25n}
+
+logging:
+  level:
+    dev.selonick.owomi: DEBUG
+    org.hibernate.SQL: DEBUG

@@ -1,0 +1,24 @@
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+# En production, toutes les valeurs sensibles proviennent de variables d'environnement.
+# JWT_SECRET et les identifiants BDD sont obligatoires — aucune valeur par défaut.
+jwt:
+  secret: ${JWT_SECRET}
+
+# Swagger désactivé en production (sauf override explicite)
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+
+logging:
+  level:
+    dev.selonick.owomi: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN

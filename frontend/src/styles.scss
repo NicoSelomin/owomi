@@ -1,0 +1,23 @@
+/* ============================================================
+   OWOMI — Point d'entrée des styles globaux
+   ============================================================ */
+
+/* --- Cœur Ionic (obligatoire) --- */
+@import "@ionic/angular/css/core.css";
+
+/* --- Styles de base Ionic --- */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* --- Utilitaires Ionic optionnels --- */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/* --- Tokens & styles OWOMI --- */
+@import "./theme/variables.css";
+@import "./theme/global.scss";

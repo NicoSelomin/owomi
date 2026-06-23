@@ -1,0 +1,60 @@
+/* ============================================================
+   OWOMI — Tokens CSS (Design System v1.0)
+   Variables de couleurs, typographie et overrides Ionic.
+   ============================================================ */
+
+:root {
+  /* --- Couleurs principales --- */
+  --owomi-color-nuit:   #0C131E;
+  --owomi-color-or:     #D49E10;
+  --owomi-color-vert:   #1D9E75;
+  --owomi-color-corail: #D85A30;
+  --owomi-color-ivoire: #F7F5F0;
+  --owomi-color-rouge:  #E24B4A;
+
+  /* --- Couleurs sémantiques --- */
+  --owomi-income-bg:    #E1F5EE;
+  --owomi-income-text:  #085041;
+  --owomi-expense-bg:   #FAECE7;
+  --owomi-expense-text: #4A1B0C;
+
+  /* --- Typographie --- */
+  --owomi-font-display: 'Sora', sans-serif;
+  --owomi-font-body:    'Plus Jakarta Sans', sans-serif;
+  --owomi-font-mono:    'IBM Plex Mono', monospace;
+
+  /* ============================================================
+     Overrides Ionic — la palette OWOMI pilote le thème Ionic
+     ============================================================ */
+
+  /* Primaire = Or */
+  --ion-color-primary:          var(--owomi-color-or);
+  --ion-color-primary-rgb:      212, 158, 16;
+  --ion-color-primary-contrast: var(--owomi-color-nuit);
+  --ion-color-primary-contrast-rgb: 12, 19, 30;
+  --ion-color-primary-shade:    #bb8b0e;
+  --ion-color-primary-tint:     #d8a828;
+
+  /* Succès = Vert (revenus) */
+  --ion-color-success:          var(--owomi-color-vert);
+  --ion-color-success-rgb:      29, 158, 117;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-shade:    #1a8b67;
+  --ion-color-success-tint:     #34a883;
+
+  /* Danger = Rouge (dépenses / erreurs) */
+  --ion-color-danger:           var(--owomi-color-rouge);
+  --ion-color-danger-rgb:       226, 75, 74;
+  --ion-color-danger-contrast:  #ffffff;
+  --ion-color-danger-shade:     #c74241;
+  --ion-color-danger-tint:      #e55d5c;
+
+  /* Fond & texte */
+  --ion-background-color:       var(--owomi-color-ivoire);
+  --ion-background-color-rgb:   247, 245, 240;
+  --ion-text-color:             #1C1C1A;
+  --ion-text-color-rgb:         28, 28, 26;
+
+  /* Police par défaut */
+  --ion-font-family:            var(--owomi-font-body);
+}

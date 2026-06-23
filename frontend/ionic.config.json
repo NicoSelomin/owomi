@@ -1,0 +1,7 @@
+{
+  "name": "OWOMI",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: owomi-backend
+
+  profiles:
+    # Profil par défaut en l'absence de SPRING_PROFILES_ACTIVE
+    default: dev
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/owomi_db}
+    username: ${DB_USERNAME:owomi_user}
+    password: ${DB_PASSWORD:owomi_dev_password}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # Flyway gère le schéma — Hibernate ne fait que valider
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+# Métadonnées applicatives
+app:
+  version: 1.0.0
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET:}
+  access-expiration: ${JWT_ACCESS_EXPIRATION:3600000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+# CORS
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+
+# Swagger — désactivé en production
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:true}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}
+    path: /swagger-ui.html
+
+# Actuator — uniquement health en public, sans détails
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+# Logging — pas de données sensibles
+logging:
+  level:
+    dev.selonick.owomi: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN

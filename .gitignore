@@ -1,0 +1,53 @@
+# ============================================================
+# OWOMI — .gitignore racine du monorepo
+# ============================================================
+
+# --- Secrets / variables d'environnement ---
+.env
+.env.*
+*.env
+!.env.example
+application-secrets.yml
+
+# --- Java / Spring Boot ---
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/.gradle-enterprise/
+.mvn/.develocity/
+
+# --- Node / Angular ---
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+yarn-error.log*
+
+# --- Capacitor / mobile natif ---
+/frontend/android/
+/frontend/ios/
+.gradle/
+
+# --- IDE ---
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# --- Logs ---
+*.log
+logs/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Build / test ---
+coverage/
+*.lcov
+.nyc_output/
