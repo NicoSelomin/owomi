@@ -31,6 +31,8 @@ public class AuthService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final UserMapper userMapper;
+    private final EmailVerificationService emailVerificationService;
+    private final PasswordResetService passwordResetService;
 
     /** Inscription d'un nouvel utilisateur. */
     @Transactional
@@ -53,7 +55,40 @@ public class AuthService {
         User saved = userRepository.save(user);
         log.info("New user registered: id={}, email={}", saved.getId(), saved.getEmail());
 
+        // Le compte est actif immédiatement ; l'email reste à vérifier via le lien envoyé.
+        emailVerificationService.createAndSend(saved);
+
         return buildAuthResponse(saved);
+    }
+
+    /** Confirmation d'adresse email à partir du token reçu par email. */
+    @Transactional
+    public void verifyEmail(String token) {
+        emailVerificationService.verify(token);
+    }
+
+    /**
+     * Renvoi de l'email de vérification.
+     * Ne révèle jamais si l'email existe ou est déjà vérifié (réponse générique côté contrôleur).
+     */
+    @Transactional
+    public void resendVerification(String email) {
+        emailVerificationService.resend(email);
+    }
+
+    /**
+     * Demande de réinitialisation de mot de passe.
+     * Ne révèle jamais si l'email existe (réponse générique côté contrôleur).
+     */
+    @Transactional
+    public void forgotPassword(String email) {
+        passwordResetService.requestReset(email);
+    }
+
+    /** Application d'un nouveau mot de passe à partir d'un token de réinitialisation. */
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        passwordResetService.reset(token, newPassword);
     }
 
     /** Connexion par email / mot de passe. */

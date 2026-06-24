@@ -1,0 +1,178 @@
+/* ============================================================
+   OWOMI — Styles partagés des pages d'authentification secondaires
+   (vérification email, mot de passe oublié, réinitialisation).
+   Repris de la charte des pages login/register.
+   ============================================================ */
+
+:host {
+  --nuit:   #0C131E;
+  --nuit-d: #1A2235;
+  --nuit-c: #243047;
+  --or:     #D49E10;
+  --vert:   #1D9E75;
+  --rouge:  #E24B4A;
+  --blanc:  #FFFFFF;
+  --fd: 'Sora', sans-serif;
+  --fb: 'Plus Jakarta Sans', sans-serif;
+
+  display: block;
+  font-family: var(--fb);
+  background: var(--nuit);
+  color: var(--blanc);
+}
+
+* { box-sizing: border-box; }
+
+/* ── Décor de fond ── */
+.page-deco { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.deco { position: absolute; border-radius: 50%; pointer-events: none; }
+.deco-1 { width: 400px; height: 400px; background: rgba(212,158,16,.05); top: -100px; right: -100px; }
+.deco-2 { width: 250px; height: 250px; background: rgba(29,158,117,.04); bottom: -60px; left: -60px; }
+.gold-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--or); z-index: 10; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Logo ── */
+.logo-mini { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo-mark-sm { width: 36px; height: 36px; border-radius: 10px; background: var(--or); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-inner-sm { width: 18px; height: 18px; border-radius: 50%; background: var(--nuit); display: flex; align-items: center; justify-content: center; }
+.logo-dot-sm { width: 7px; height: 7px; border-radius: 50%; background: var(--or); }
+.logo-name { font-family: var(--fd); font-size: 20px; font-weight: 700; color: var(--blanc); letter-spacing: .04em; }
+.logo-name span { color: var(--or); }
+
+/* ── Layout centré (une seule colonne) ── */
+.auth-center {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px; padding: 32px 20px 56px;
+}
+
+/* ── Carte ── */
+.form-card {
+  background: var(--nuit-d);
+  border: .5px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  padding: 36px 32px;
+  width: 100%; max-width: 440px;
+  animation: fadeUp .45s .08s ease both;
+}
+.form-title { font-family: var(--fd); font-size: 24px; font-weight: 700; color: var(--blanc); margin-bottom: 4px; }
+.form-sub { font-size: 13px; color: rgba(255,255,255,.4); margin-bottom: 24px; line-height: 1.6; }
+
+/* ── Champs ── */
+.form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+label { font-size: 13px; font-weight: 500; color: rgba(255,255,255,.65); }
+
+.input-wrap { position: relative; }
+.input-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px;
+  stroke: rgba(255,255,255,.3); fill: none;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  pointer-events: none;
+}
+.input-wrap input {
+  width: 100%; height: 46px;
+  background: var(--nuit-c);
+  border: .5px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  color: var(--blanc);
+  font-family: var(--fb); font-size: 14px;
+  padding: 0 12px 0 38px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.input-wrap input::placeholder { color: rgba(255,255,255,.2); }
+.input-wrap input:focus { border-color: var(--or); box-shadow: 0 0 0 3px rgba(212,158,16,.15); }
+.input-wrap input.err { border-color: var(--rouge); box-shadow: 0 0 0 3px rgba(226,75,74,.12); }
+.input-wrap input.ok  { border-color: var(--vert);  box-shadow: 0 0 0 3px rgba(29,158,117,.12); }
+.input-wrap input.pwd-field { padding-right: 44px; }
+
+.eye-btn {
+  position: absolute; right: 0; top: 0;
+  width: 44px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer; border-radius: 0 10px 10px 0;
+}
+.eye-btn svg { width: 16px; height: 16px; stroke: rgba(255,255,255,.3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.eye-btn:hover svg { stroke: rgba(255,255,255,.6); }
+
+.hint { font-size: 11px; color: rgba(255,255,255,.3); }
+.hint.err { color: #F09595; }
+.hint.ok  { color: #5DCAA5; }
+
+/* ── Alertes ── */
+.alert-err, .alert-ok {
+  border-radius: 10px;
+  padding: 12px 16px; margin-bottom: 16px;
+  font-size: 13px; line-height: 1.5;
+  display: flex; align-items: center; gap: 10px;
+}
+.alert-err { background: rgba(226,75,74,.1); border: .5px solid rgba(226,75,74,.3); color: #F09595; }
+.alert-ok  { background: rgba(29,158,117,.1); border: .5px solid rgba(29,158,117,.3); color: #5DCAA5; }
+.alert-err svg, .alert-ok svg { width: 16px; height: 16px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.alert-err svg { stroke: #F09595; }
+.alert-ok svg { stroke: #5DCAA5; }
+
+/* ── Indicateur d'état (icône ronde centrée) ── */
+.status-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.status-icon.ok   { background: rgba(29,158,117,.12); }
+.status-icon.bad  { background: rgba(226,75,74,.12); }
+.status-icon.wait { background: rgba(212,158,16,.12); }
+.status-icon svg { width: 30px; height: 30px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.status-icon.ok svg   { stroke: var(--vert); }
+.status-icon.bad svg  { stroke: var(--rouge); }
+.status-icon.wait svg { stroke: var(--or); }
+
+.spinner {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 3px solid rgba(212,158,16,.2); border-top-color: var(--or);
+  animation: spin .8s linear infinite;
+}
+.center-text { text-align: center; }
+
+/* ── Force du mot de passe ── */
+.strength { display: flex; gap: 6px; margin: 8px 0 4px; }
+.strength-bar { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.08); transition: background .2s; }
+.strength-label { font-size: 11px; }
+
+/* ── Boutons ── */
+.btn-submit {
+  width: 100%; height: 50px; border-radius: 12px;
+  background: var(--or); color: var(--nuit);
+  font-family: var(--fb); font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer;
+  transition: opacity .15s, transform .1s; margin-top: 4px;
+  text-decoration: none; display: flex; align-items: center; justify-content: center;
+}
+.btn-submit:hover { opacity: .9; }
+.btn-submit:active { transform: scale(.98); }
+.btn-submit.loading, .btn-submit:disabled { opacity: .7; cursor: not-allowed; }
+
+.btn-ghost {
+  width: 100%; height: 46px; border-radius: 12px;
+  background: var(--nuit-c); color: rgba(255,255,255,.7);
+  font-family: var(--fb); font-size: 14px; font-weight: 500;
+  border: .5px solid rgba(255,255,255,.1); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s; text-decoration: none; margin-top: 10px;
+}
+.btn-ghost:hover { background: rgba(255,255,255,.06); }
+
+/* ── Liens ── */
+.foot-link { text-align: center; font-size: 13px; color: rgba(255,255,255,.4); margin-top: 18px; }
+.foot-link a { color: var(--or); text-decoration: none; font-weight: 500; }
+.foot-link a:hover { text-decoration: underline; }
+
+@media (min-width: 640px) {
+  .auth-center { padding: 48px 24px 64px; }
+}

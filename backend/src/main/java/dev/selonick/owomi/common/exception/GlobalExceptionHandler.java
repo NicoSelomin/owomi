@@ -1,12 +1,14 @@
 package dev.selonick.owomi.common.exception;
 
 import dev.selonick.owomi.common.response.ApiResponse;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -40,6 +42,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.name(), "Données invalides.", details));
+    }
+
+    /** Erreurs de validation sur les paramètres (@RequestParam annotés, @Validated sur le contrôleur). */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConstraintViolation(ConstraintViolationException ex) {
+        List<String> details = ex.getConstraintViolations()
+                .stream()
+                .map(jakarta.validation.ConstraintViolation::getMessage)
+                .toList();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.name(), "Données invalides.", details));
+    }
+
+    /** Paramètre de requête obligatoire manquant. */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParam(MissingServletRequestParameterException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.name(),
+                        "Paramètre obligatoire manquant : " + ex.getParameterName()));
     }
 
     /** Accès refusé par Spring Security (403). */

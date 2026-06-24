@@ -1,0 +1,41 @@
+<div class="page-deco" aria-hidden="true">
+  <div class="deco deco-1"></div>
+  <div class="deco deco-2"></div>
+</div>
+<div class="gold-bar"></div>
+
+<div class="auth-center">
+  <a routerLink="/splash" class="logo-mini">
+    <div class="logo-mark-sm"><div class="logo-inner-sm"><div class="logo-dot-sm"></div></div></div>
+    <div class="logo-name">OWO<span>MI</span></div>
+  </a>
+
+  <div class="form-card center-text">
+    @switch (state()) {
+      @case ('loading') {
+        <div class="status-icon wait"><div class="spinner"></div></div>
+        <div class="form-title">Vérification en cours…</div>
+        <div class="form-sub">Nous confirmons votre adresse email, un instant.</div>
+      }
+      @case ('success') {
+        <div class="status-icon ok">
+          <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div class="form-title">Adresse email vérifiée 🎉</div>
+        <div class="form-sub">
+          Votre adresse email a bien été confirmée. Vous pouvez maintenant profiter pleinement d'OWOMI.
+        </div>
+        <a class="btn-submit" routerLink="/auth/login">Se connecter</a>
+      }
+      @case ('error') {
+        <div class="status-icon bad">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div class="form-title">Vérification impossible</div>
+        <div class="form-sub">{{ errorMessage() }}</div>
+        <a class="btn-submit" routerLink="/auth/login">Aller à la connexion</a>
+        <div class="foot-link">Besoin d'aide ? <a routerLink="/auth/forgot-password">Réinitialiser le mot de passe</a></div>
+      }
+    }
+  </div>
+</div>

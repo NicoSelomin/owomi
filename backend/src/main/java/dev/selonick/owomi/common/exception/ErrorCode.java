@@ -22,6 +22,11 @@ public enum ErrorCode {
     CATEGORY_HAS_TRANSACTIONS("Cette catégorie est liée à des transactions.", HttpStatus.CONFLICT),
     CATEGORY_IS_DEFAULT("Cette catégorie par défaut ne peut pas être modifiée.", HttpStatus.CONFLICT),
     RATE_LIMIT_EXCEEDED("Trop de requêtes. Réessayez dans quelques instants.", HttpStatus.TOO_MANY_REQUESTS),
+    EMAIL_NOT_VERIFIED("Votre adresse email n'est pas encore vérifiée.", HttpStatus.FORBIDDEN),
+    VERIFICATION_TOKEN_INVALID("Lien de vérification invalide.", HttpStatus.BAD_REQUEST),
+    VERIFICATION_TOKEN_EXPIRED("Lien de vérification expiré. Veuillez en demander un nouveau.", HttpStatus.BAD_REQUEST),
+    RESET_TOKEN_INVALID("Lien de réinitialisation invalide.", HttpStatus.BAD_REQUEST),
+    RESET_TOKEN_EXPIRED("Lien de réinitialisation expiré. Veuillez en demander un nouveau.", HttpStatus.BAD_REQUEST),
     INTERNAL_ERROR("Une erreur inattendue est survenue. Réessayez.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     /** Message par défaut affiché à l'utilisateur (français). */

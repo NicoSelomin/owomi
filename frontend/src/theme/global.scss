@@ -36,7 +36,8 @@ app-root {
    overflow-x: hidden → jamais de scroll horizontal.
    Scrollbar fine aux couleurs OWOMI (or subtil).
    ------------------------------------------------------------ */
-app-splash, app-login, app-register, app-dashboard {
+app-splash, app-login, app-register, app-dashboard,
+app-verify-email, app-forgot-password, app-reset-password, app-email-sent {
   display: block;
   height: 100%;
   overflow-y: auto;
@@ -48,22 +49,38 @@ app-splash, app-login, app-register, app-dashboard {
 app-splash::-webkit-scrollbar,
 app-login::-webkit-scrollbar,
 app-register::-webkit-scrollbar,
-app-dashboard::-webkit-scrollbar { width: 4px; }
+app-dashboard::-webkit-scrollbar,
+app-verify-email::-webkit-scrollbar,
+app-forgot-password::-webkit-scrollbar,
+app-reset-password::-webkit-scrollbar,
+app-email-sent::-webkit-scrollbar { width: 4px; }
 
 app-splash::-webkit-scrollbar-track,
 app-login::-webkit-scrollbar-track,
 app-register::-webkit-scrollbar-track,
-app-dashboard::-webkit-scrollbar-track { background: transparent; }
+app-dashboard::-webkit-scrollbar-track,
+app-verify-email::-webkit-scrollbar-track,
+app-forgot-password::-webkit-scrollbar-track,
+app-reset-password::-webkit-scrollbar-track,
+app-email-sent::-webkit-scrollbar-track { background: transparent; }
 
 app-splash::-webkit-scrollbar-thumb,
 app-login::-webkit-scrollbar-thumb,
 app-register::-webkit-scrollbar-thumb,
-app-dashboard::-webkit-scrollbar-thumb { background: rgba(212, 158, 16, .3); border-radius: 2px; }
+app-dashboard::-webkit-scrollbar-thumb,
+app-verify-email::-webkit-scrollbar-thumb,
+app-forgot-password::-webkit-scrollbar-thumb,
+app-reset-password::-webkit-scrollbar-thumb,
+app-email-sent::-webkit-scrollbar-thumb { background: rgba(212, 158, 16, .3); border-radius: 2px; }
 
 app-splash::-webkit-scrollbar-thumb:hover,
 app-login::-webkit-scrollbar-thumb:hover,
 app-register::-webkit-scrollbar-thumb:hover,
-app-dashboard::-webkit-scrollbar-thumb:hover { background: rgba(212, 158, 16, .6); }
+app-dashboard::-webkit-scrollbar-thumb:hover,
+app-verify-email::-webkit-scrollbar-thumb:hover,
+app-forgot-password::-webkit-scrollbar-thumb:hover,
+app-reset-password::-webkit-scrollbar-thumb:hover,
+app-email-sent::-webkit-scrollbar-thumb:hover { background: rgba(212, 158, 16, .6); }
 
 /* --- Typographie de base --- */
 body {

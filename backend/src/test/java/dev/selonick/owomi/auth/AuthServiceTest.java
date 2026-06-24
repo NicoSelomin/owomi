@@ -45,6 +45,10 @@ class AuthServiceTest {
     private RefreshTokenService refreshTokenService;
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private EmailVerificationService emailVerificationService;
+    @Mock
+    private PasswordResetService passwordResetService;
 
     @InjectMocks
     private AuthService authService;
@@ -106,6 +110,8 @@ class AuthServiceTest {
         assertThat(response.user().email()).isEqualTo("test@owomi.dev");
         verify(userRepository).save(any(User.class));
         verify(refreshTokenService).create(saved, "refresh-token");
+        // Un email de vérification doit être généré et envoyé après l'inscription
+        verify(emailVerificationService).createAndSend(saved);
     }
 
     // --- login ---
