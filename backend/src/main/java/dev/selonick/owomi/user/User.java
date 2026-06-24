@@ -43,6 +43,10 @@ public class User extends BaseEntity {
     @JsonIgnore
     private String password;
 
+    /** Vrai une fois l'adresse email confirmée via le lien de vérification. */
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "currency_code", referencedColumnName = "code")
     private Currency currency;

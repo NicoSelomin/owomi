@@ -1,0 +1,14 @@
+@use '../auth-shared';
+
+/* Animation subtile de l'enveloppe (léger flottement vertical). */
+@keyframes envelope-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+.envelope {
+  animation: envelope-float 2.4s ease-in-out infinite;
+}
+
+/* Les deux liens de pied sont plus rapprochés que l'espacement par défaut. */
+.foot-link + .foot-link { margin-top: 6px; }

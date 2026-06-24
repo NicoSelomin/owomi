@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/api-response.model';
@@ -46,6 +46,36 @@ export class AuthService {
     return this.http
       .post<ApiResponse<AuthResponse>>(`${this.BASE_URL}/refresh`, { refreshToken })
       .pipe(tap((res) => this.tokenService.setAccessToken(res.data.accessToken)));
+  }
+
+  /** Confirme l'adresse email à partir du token reçu par email (lien de vérification). */
+  verifyEmail(token: string): Observable<ApiResponse<void>> {
+    const params = new HttpParams().set('token', token);
+    return this.http.get<ApiResponse<void>>(`${this.BASE_URL}/verify-email`, { params });
+  }
+
+  /**
+   * Renvoie l'email de vérification.
+   * Le backend répond toujours 200 (pas de fuite sur l'existence du compte).
+   */
+  resendVerification(email: string): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`${this.BASE_URL}/resend-verification`, { email });
+  }
+
+  /**
+   * Demande de réinitialisation de mot de passe.
+   * Le backend répond toujours 200 (pas de fuite sur l'existence du compte).
+   */
+  forgotPassword(email: string): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`${this.BASE_URL}/forgot-password`, { email });
+  }
+
+  /** Applique un nouveau mot de passe à partir d'un token de réinitialisation. */
+  resetPassword(token: string, newPassword: string): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`${this.BASE_URL}/reset-password`, {
+      token,
+      newPassword,
+    });
   }
 
   /** Déconnexion : révoque le refresh token côté serveur puis nettoie l'état local. */

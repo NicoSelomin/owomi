@@ -185,7 +185,9 @@ export class RegisterPage {
       .subscribe({
         next: () => {
           this.isLoading.set(false);
-          this.router.navigateByUrl('/app/dashboard');
+          // L'email en attente de vérification est conservé pour la page « Email envoyé »
+          sessionStorage.setItem('owomi_pending_email', raw.email.trim());
+          this.router.navigateByUrl('/auth/email-sent');
         },
         error: (err: HttpErrorResponse) => {
           this.isLoading.set(false);

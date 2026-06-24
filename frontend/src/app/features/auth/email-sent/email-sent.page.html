@@ -1,0 +1,40 @@
+<div class="page-deco" aria-hidden="true">
+  <div class="deco deco-1"></div>
+  <div class="deco deco-2"></div>
+</div>
+<div class="gold-bar"></div>
+
+<div class="auth-center">
+  <a routerLink="/splash" class="logo-mini">
+    <div class="logo-mark-sm"><div class="logo-inner-sm"><div class="logo-dot-sm"></div></div></div>
+    <div class="logo-name">OWO<span>MI</span></div>
+  </a>
+
+  <div class="form-card center-text">
+    <div class="status-icon wait envelope">
+      <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3,7 12,13 21,7"/></svg>
+    </div>
+
+    <div class="form-title">Vérifiez votre boîte mail</div>
+    <div class="form-sub">
+      Un lien de confirmation a été envoyé à <strong>{{ maskedEmail() }}</strong>.
+      Cliquez sur le lien pour activer votre compte.
+    </div>
+
+    @if (resendSuccess()) {
+      <div class="alert-ok">
+        <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+        Email renvoyé avec succès !
+      </div>
+    }
+
+    <button class="btn-submit" type="button"
+            [disabled]="!canResend()" [class.loading]="!canResend()"
+            (click)="onResend()">
+      {{ resendLabel() }}
+    </button>
+
+    <div class="foot-link">Déjà confirmé ? <a routerLink="/auth/login">Se connecter</a></div>
+    <div class="foot-link">Mauvaise adresse ? <a routerLink="/auth/register">S'inscrire à nouveau</a></div>
+  </div>
+</div>
