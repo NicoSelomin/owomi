@@ -2,6 +2,69 @@
    OWOMI — Styles globaux applicatifs
    ============================================================ */
 
+/* ------------------------------------------------------------
+   Défilement natif
+
+   Ionic (structure.css) applique `body { position: fixed; overflow: hidden }`
+   car il délègue le scroll à <ion-content>. Or les pages OWOMI sont rendues en
+   HTML pur dans un <router-outlet> standard (sans ion-content) : ce réglage
+   coupe tout contenu dépassant l'écran. On rétablit donc le défilement du document.
+   Ces règles sont importées APRÈS le CSS Ionic → elles le surchargent.
+   ------------------------------------------------------------ */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;     /* aucun scroll au niveau du document → pas de scrollbar permanente */
+}
+
+body {
+  position: relative;   /* annule le position: fixed d'Ionic */
+  max-height: none;
+}
+
+/* Chaîne de hauteur : html → body → app-root → :host de page.
+   Le défilement est délégué au :host de chaque page (un seul conteneur scrollable). */
+app-root {
+  display: block;
+  height: 100%;
+}
+
+/* ------------------------------------------------------------
+   Conteneurs de défilement = les hôtes de page.
+   overflow-y: auto → la scrollbar n'apparaît QUE si le contenu dépasse.
+   overflow-x: hidden → jamais de scroll horizontal.
+   Scrollbar fine aux couleurs OWOMI (or subtil).
+   ------------------------------------------------------------ */
+app-splash, app-login, app-register, app-dashboard {
+  display: block;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;                              /* Firefox */
+  scrollbar-color: rgba(212, 158, 16, .3) transparent;
+}
+
+app-splash::-webkit-scrollbar,
+app-login::-webkit-scrollbar,
+app-register::-webkit-scrollbar,
+app-dashboard::-webkit-scrollbar { width: 4px; }
+
+app-splash::-webkit-scrollbar-track,
+app-login::-webkit-scrollbar-track,
+app-register::-webkit-scrollbar-track,
+app-dashboard::-webkit-scrollbar-track { background: transparent; }
+
+app-splash::-webkit-scrollbar-thumb,
+app-login::-webkit-scrollbar-thumb,
+app-register::-webkit-scrollbar-thumb,
+app-dashboard::-webkit-scrollbar-thumb { background: rgba(212, 158, 16, .3); border-radius: 2px; }
+
+app-splash::-webkit-scrollbar-thumb:hover,
+app-login::-webkit-scrollbar-thumb:hover,
+app-register::-webkit-scrollbar-thumb:hover,
+app-dashboard::-webkit-scrollbar-thumb:hover { background: rgba(212, 158, 16, .6); }
+
 /* --- Typographie de base --- */
 body {
   font-family: var(--owomi-font-body);

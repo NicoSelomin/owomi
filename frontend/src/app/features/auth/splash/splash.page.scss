@@ -7,7 +7,7 @@
   --fb: 'Plus Jakarta Sans', sans-serif;
 
   display: block;
-  min-height: 100vh;
+  /* hauteur (100%) + overflow gérés globalement (cf. theme/global.scss) */
   font-family: var(--fb);
   background: var(--nuit);
   color: var(--blanc);
@@ -15,8 +15,11 @@
 
 * { box-sizing: border-box; }
 
-/* ── DÉCORATIONS ── */
-.deco { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
+/* ── DÉCORATIONS ──
+   Conteneur fixe plein écran qui CLIPPE les cercles : sans lui, leurs débordements
+   (offsets négatifs) ajoutaient une zone de scroll fantôme + un liseré blanc. */
+.page-deco { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.deco { position: absolute; border-radius: 50%; pointer-events: none; }
 .deco-1 { width: 400px; height: 400px; background: rgba(212,158,16,.05); top: -120px; right: -100px; }
 .deco-2 { width: 250px; height: 250px; background: rgba(29,158,117,.04); bottom: -80px; left: -80px; }
 .gold-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--or); z-index: 10; }

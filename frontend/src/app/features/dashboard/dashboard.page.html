@@ -1,0 +1,54 @@
+<!-- ── Barre supérieure ── -->
+<header class="top-bar">
+  <a routerLink="/app/dashboard" class="top-bar-logo">
+    <div class="logo-mark"><div class="logo-inner"><div class="logo-dot"></div></div></div>
+    <div class="logo-name">OWO<span>MI</span></div>
+  </a>
+  <div class="top-bar-right">
+    <div class="top-avatar">{{ initials() }}</div>
+    <button class="logout-btn" type="button" (click)="onLogout()" [disabled]="isLoggingOut()"
+            aria-label="Se déconnecter">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ── Contenu ── -->
+<main class="main">
+  <div class="page-header">
+    <div class="page-greeting">Bonjour 👋</div>
+    <div class="page-title">{{ user()?.name ?? 'Bienvenue' }}</div>
+  </div>
+
+  <!-- Carte d'accueil -->
+  <section class="balance-card">
+    <div class="balance-accent"></div>
+    <div class="balance-label">Connecté en tant que</div>
+    <div class="balance-amount">{{ user()?.name ?? '—' }}</div>
+    <div class="balance-sub">{{ user()?.email ?? '' }}</div>
+
+    <div class="info-pills">
+      <div class="info-pill">
+        <div class="pill-label">Devise</div>
+        <div class="pill-value">
+          {{ user()?.currency?.code ?? '—' }}
+          @if (user()?.currency?.symbol) {
+            <span class="pill-symbol">{{ user()?.currency?.symbol }}</span>
+          }
+        </div>
+      </div>
+      <div class="info-pill">
+        <div class="pill-label">Pays / locale</div>
+        <div class="pill-value">{{ user()?.currency?.locale ?? '—' }}</div>
+      </div>
+    </div>
+  </section>
+
+  <p class="placeholder-note">
+    Votre tableau de bord complet (solde, statistiques, transactions) arrivera dans les prochaines étapes.
+  </p>
+
+  <button class="btn-logout" type="button" (click)="onLogout()" [disabled]="isLoggingOut()">
+    {{ isLoggingOut() ? 'Déconnexion…' : 'Se déconnecter' }}
+  </button>
+</main>
