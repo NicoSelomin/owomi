@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OWOMI — Rapports</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --nuit:#0C131E;--nuit-d:#1A2235;--nuit-c:#243047;
+  --or:#D49E10;--vert:#1D9E75;--corail:#D85A30;
+  --blanc:#FFFFFF;--gris:#888780;--bg:#F7F5F0;
+  --fd:'Sora',sans-serif;--fb:'Plus Jakarta Sans',sans-serif;
+}
+html,body{width:100%;min-height:100%;font-family:var(--fb);background:var(--bg);color:var(--nuit);}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--nuit);display:flex;flex-direction:column;z-index:100;padding:0 0 24px;}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:.5px solid rgba(255,255,255,.06);margin-bottom:8px;}
+.logo-mini{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-mark{width:34px;height:34px;border-radius:9px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-inner{width:17px;height:17px;border-radius:50%;background:var(--nuit);display:flex;align-items:center;justify-content:center;}
+.logo-dot{width:6px;height:6px;border-radius:50%;background:var(--or);}
+.logo-name{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--blanc);letter-spacing:.04em;}
+.logo-name span{color:var(--or);}
+.nav-section{padding:0 12px;margin-bottom:4px;}
+.nav-label{font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;padding:8px 8px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);text-decoration:none;cursor:pointer;transition:all .15s;margin-bottom:2px;}
+.nav-item svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);}
+.nav-item.active{background:rgba(212,158,16,.15);color:var(--or);}
+.nav-item.active svg{stroke:var(--or);}
+.sidebar-footer{margin-top:auto;padding:0 12px;border-top:.5px solid rgba(255,255,255,.06);padding-top:16px;}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.07);}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:13px;font-weight:700;color:var(--nuit);flex-shrink:0;}
+.user-info{flex:1;min-width:0;}
+.user-name{font-size:12px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-devise{font-size:10px;color:rgba(255,255,255,.3);}
+.logout-btn{background:none;border:none;cursor:pointer;padding:4px;}
+.logout-btn svg{width:14px;height:14px;stroke:rgba(255,255,255,.25);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── TOP BAR ── */
+.top-bar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--nuit);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:99;border-bottom:.5px solid rgba(255,255,255,.06);}
+.top-avatar{width:32px;height:32px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:12px;font-weight:700;color:var(--nuit);}
+
+/* ── TAB BAR ── */
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--nuit);display:flex;align-items:center;border-top:.5px solid rgba(255,255,255,.06);z-index:100;padding:0 8px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:500;color:rgba(255,255,255,.4);cursor:pointer;transition:all .15s;text-decoration:none;}
+.tab-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.tab-item.active{color:var(--or);}
+.tab-item.active svg{stroke:var(--or);}
+.tab-fab{width:48px;height:48px;border-radius:50%;background:var(--or);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin:0 8px;box-shadow:0 4px 16px rgba(212,158,16,.35);}
+.tab-fab svg{width:22px;height:22px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.page-title{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--nuit);}
+
+/* ── PÉRIODE SELECTOR ── */
+.period-card{background:var(--blanc);border-radius:14px;padding:16px;border:.5px solid rgba(0,0,0,.06);margin-bottom:16px;}
+.period-label{font-size:12px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.period-row{display:flex;gap:10px;align-items:center;}
+.period-select{flex:1;height:42px;border-radius:10px;border:.5px solid rgba(0,0,0,.1);background:var(--bg);font-family:var(--fb);font-size:14px;color:var(--nuit);padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;}
+.period-select:focus{border-color:var(--or);}
+.period-arrow{font-size:18px;color:var(--gris);cursor:pointer;padding:8px;border-radius:8px;background:none;border:none;transition:background .15s;}
+.period-arrow:hover{background:var(--bg);}
+.period-current{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--nuit);min-width:120px;text-align:center;}
+
+/* ── CARTE SOLDE ── */
+.balance-card{background:var(--nuit);border-radius:16px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
+.balance-card::after{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:rgba(212,158,16,.06);}
+.balance-accent{width:24px;height:3px;background:var(--or);border-radius:2px;margin-bottom:10px;}
+.balance-label{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.balance-amount{font-family:var(--fd);font-size:32px;font-weight:700;color:var(--blanc);margin-bottom:3px;line-height:1.1;}
+.balance-sub{font-size:12px;color:rgba(255,255,255,.3);margin-bottom:14px;}
+.balance-pills{display:flex;gap:8px;}
+.balance-pill{flex:1;background:rgba(255,255,255,.06);border-radius:9px;padding:9px 10px;}
+.pill-label{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.pill-value{font-family:var(--fd);font-size:14px;font-weight:600;}
+.pill-value.income{color:#5DCAA5;}
+.pill-value.expense{color:#F0997B;}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat-card{background:var(--blanc);border-radius:12px;padding:14px 16px;border:.5px solid rgba(0,0,0,.06);}
+.stat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.stat-icon svg{width:15px;height:15px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.stat-icon.income{background:#E1F5EE;}
+.stat-icon.income svg{stroke:var(--vert);}
+.stat-icon.expense{background:#FAECE7;}
+.stat-icon.expense svg{stroke:var(--corail);}
+.stat-icon.count{background:#E8EEF4;}
+.stat-icon.count svg{stroke:#185FA5;}
+.stat-icon.avg{background:#FAEEDA;}
+.stat-icon.avg svg{stroke:var(--or);}
+.stat-label{font-size:11px;color:var(--gris);margin-bottom:3px;}
+.stat-value{font-family:var(--fd);font-size:16px;font-weight:700;}
+.stat-value.income{color:var(--vert);}
+.stat-value.expense{color:var(--corail);}
+.stat-value.neutral{color:var(--nuit);}
+.stat-trend{font-size:11px;margin-top:3px;}
+.stat-trend.up{color:var(--vert);}
+.stat-trend.down{color:var(--corail);}
+
+/* ── CHARTS ── */
+.chart-card{background:var(--blanc);border-radius:14px;padding:16px;margin-bottom:16px;border:.5px solid rgba(0,0,0,.06);}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.card-title{font-size:14px;font-weight:600;color:var(--nuit);}
+.card-badge{font-size:11px;color:var(--gris);background:#F2F0EB;padding:3px 10px;border-radius:20px;}
+
+/* ── TABLEAU CATÉGORIES ── */
+.cat-table{width:100%;border-collapse:collapse;}
+.cat-table th{font-size:11px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;text-align:left;border-bottom:.5px solid #F2F0EB;}
+.cat-table td{padding:10px 12px;border-bottom:.5px solid #F2F0EB;font-size:13px;}
+.cat-table tr:last-child td{border-bottom:none;}
+.cat-table tr:hover td{background:#FAFAF8;}
+.cat-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:middle;}
+.cat-bar-wrap{flex:1;height:6px;background:#F2F0EB;border-radius:3px;overflow:hidden;min-width:60px;}
+.cat-bar{height:100%;border-radius:3px;transition:width .4s ease;}
+.cat-pct{font-size:12px;font-weight:600;color:var(--nuit);min-width:36px;text-align:right;}
+
+/* ── EXPORT CARD ── */
+.export-card{background:var(--blanc);border-radius:14px;padding:20px;border:.5px solid rgba(0,0,0,.06);margin-bottom:16px;}
+.export-title{font-size:14px;font-weight:600;color:var(--nuit);margin-bottom:4px;}
+.export-sub{font-size:12px;color:var(--gris);margin-bottom:16px;}
+.export-preview{background:var(--bg);border-radius:10px;padding:14px;border:.5px solid rgba(0,0,0,.06);margin-bottom:14px;}
+.export-preview-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;}
+.export-preview-row:last-child{margin-bottom:0;padding-top:6px;border-top:.5px solid rgba(0,0,0,.06);font-weight:600;}
+.export-preview-label{color:var(--gris);}
+.export-preview-value{font-weight:500;color:var(--nuit);}
+.export-preview-value.income{color:var(--vert);}
+.export-preview-value.expense{color:var(--corail);}
+.btn-export{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;border-radius:12px;background:var(--or);color:var(--nuit);font-family:var(--fb);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;}
+.btn-export:hover{opacity:.9;}
+.btn-export svg{width:16px;height:16px;stroke:var(--nuit);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.btn-export.loading{opacity:.7;cursor:not-allowed;}
+
+/* ── FAB DESKTOP ── */
+.fab-desktop{display:none;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--nuit);color:var(--blanc);padding:12px 20px;border-radius:12px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:300;white-space:nowrap;border:.5px solid rgba(255,255,255,.1);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:rgba(29,158,117,.4);}
+.toast .toast-icon{display:inline-block;margin-right:6px;}
+
+/* ── LAYOUTS ── */
+.layout-mobile{display:block;}
+.layout-mobile .main{padding:72px 16px 80px;}
+.layout-tablet{display:none;}
+.layout-tablet .main{padding:80px 24px 80px;max-width:720px;margin:0 auto;}
+.layout-desktop{display:none;}
+.layout-desktop .app-shell{display:flex;min-height:100vh;}
+.layout-desktop .content-area{margin-left:220px;flex:1;padding:32px;min-height:100vh;}
+.layout-desktop .top-bar,.layout-desktop .tab-bar{display:none;}
+.layout-desktop .desktop-grid{display:grid;grid-template-columns:1fr 360px;gap:20px;}
+.layout-desktop .left-col{display:flex;flex-direction:column;gap:16px;}
+.layout-desktop .right-col{display:flex;flex-direction:column;gap:16px;}
+.layout-desktop .stats-grid{grid-template-columns:1fr 1fr;}
+
+@media(min-width:640px)and(max-width:1023px){
+  .layout-mobile{display:none;}
+  .layout-tablet{display:block;}
+  .stats-grid{grid-template-columns:repeat(4,1fr);}
+}
+@media(min-width:1024px){
+  .layout-mobile{display:none;}
+  .layout-tablet{display:none;}
+  .layout-desktop{display:block;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MOBILE                               -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-mobile">
+  <div class="top-bar">
+    <div class="logo-mini">
+      <div class="logo-mark" style="width:28px;height:28px;border-radius:8px"><div class="logo-inner" style="width:14px;height:14px"><div class="logo-dot" style="width:5px;height:5px"></div></div></div>
+      <span class="logo-name" style="font-size:16px;color:var(--blanc)">OWO<span>MI</span></span>
+    </div>
+    <div class="top-avatar">VN</div>
+  </div>
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">Rapports</div>
+    </div>
+
+    <!-- Sélecteur période -->
+    <div class="period-card">
+      <div class="period-label">Période</div>
+      <div class="period-row">
+        <button class="period-arrow" onclick="changePeriod(-1)">&#8249;</button>
+        <div class="period-current" id="period-label-m">Juin 2026</div>
+        <button class="period-arrow" onclick="changePeriod(1)">&#8250;</button>
+        <select class="period-select" id="year-select-m" onchange="updatePeriod()" style="max-width:100px">
+          <option>2026</option><option>2025</option><option>2024</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Solde -->
+    <div class="balance-card">
+      <div class="balance-accent"></div>
+      <div class="balance-label">Solde net</div>
+      <div class="balance-amount" id="balance-m">87 500 FCFA</div>
+      <div class="balance-sub">Juin 2026 · 14 transactions</div>
+      <div class="balance-pills">
+        <div class="balance-pill"><div class="pill-label">Entrées</div><div class="pill-value income">+235 000</div></div>
+        <div class="balance-pill"><div class="pill-label">Sorties</div><div class="pill-value expense">−147 500</div></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="stat-label">Total entrées</div><div class="stat-value income">235 000</div><div class="stat-trend up">↑ +12% vs mai</div></div>
+      <div class="stat-card"><div class="stat-icon expense"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div><div class="stat-label">Total sorties</div><div class="stat-value expense">147 500</div><div class="stat-trend down">↓ +5% vs mai</div></div>
+      <div class="stat-card"><div class="stat-icon count"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><div class="stat-label">Transactions</div><div class="stat-value neutral">14</div><div class="stat-trend up">↑ +2 vs mai</div></div>
+      <div class="stat-card"><div class="stat-icon avg"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="stat-label">Moy. sortie</div><div class="stat-value neutral">18 438</div><div class="stat-trend">par transaction</div></div>
+    </div>
+
+    <!-- Graphique évolution -->
+    <div class="chart-card">
+      <div class="card-header"><span class="card-title">Évolution sur 6 mois</span><span class="card-badge">Jan–Juin</span></div>
+      <canvas id="lineChart-m" height="140"></canvas>
+    </div>
+
+    <!-- Répartition par catégorie -->
+    <div class="chart-card">
+      <div class="card-header"><span class="card-title">Répartition des sorties</span><span class="card-badge">Juin 2026</span></div>
+      <table class="cat-table">
+        <thead><tr><th>Catégorie</th><th>Montant</th><th style="min-width:80px">Part</th></tr></thead>
+        <tbody id="cat-table-m"></tbody>
+      </table>
+    </div>
+
+    <!-- Export PDF -->
+    <div class="export-card">
+      <div class="export-title">Exporter le rapport</div>
+      <div class="export-sub">Téléchargez le rapport complet de Juin 2026 en PDF.</div>
+      <div class="export-preview">
+        <div class="export-preview-row"><span class="export-preview-label">Période</span><span class="export-preview-value">Juin 2026</span></div>
+        <div class="export-preview-row"><span class="export-preview-label">Entrées</span><span class="export-preview-value income">+235 000 FCFA</span></div>
+        <div class="export-preview-row"><span class="export-preview-label">Sorties</span><span class="export-preview-value expense">−147 500 FCFA</span></div>
+        <div class="export-preview-row"><span class="export-preview-label">Transactions</span><span class="export-preview-value">14</span></div>
+        <div class="export-preview-row"><span class="export-preview-label">Solde net</span><span class="export-preview-value income">+87 500 FCFA</span></div>
+      </div>
+      <button class="btn-export" id="export-btn-m" onclick="simulateExport('m')">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Télécharger en PDF
+      </button>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <a href="owomi_dashboard.html" class="tab-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Accueil</a>
+    <a href="owomi_transactions.html" class="tab-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+    <button class="tab-fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <a href="#" class="tab-item active"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>Profil</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- TABLET                               -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-tablet">
+  <div class="top-bar">
+    <div class="logo-mini"><div class="logo-mark" style="width:30px;height:30px;border-radius:9px"><div class="logo-inner" style="width:15px;height:15px"><div class="logo-dot" style="width:6px;height:6px"></div></div></div><span class="logo-name" style="color:var(--blanc)">OWO<span>MI</span></span></div>
+    <div class="top-avatar">VN</div>
+  </div>
+  <div class="main">
+    <div class="page-header"><div class="page-title">Rapports</div></div>
+    <div class="period-card">
+      <div class="period-label">Période</div>
+      <div class="period-row">
+        <button class="period-arrow">&#8249;</button>
+        <div class="period-current">Juin 2026</div>
+        <button class="period-arrow">&#8250;</button>
+        <select class="period-select" style="max-width:100px"><option>2026</option><option>2025</option></select>
+      </div>
+    </div>
+    <div class="balance-card">
+      <div class="balance-accent"></div>
+      <div class="balance-label">Solde net</div>
+      <div class="balance-amount">87 500 FCFA</div>
+      <div class="balance-sub">Juin 2026 · 14 transactions</div>
+      <div class="balance-pills">
+        <div class="balance-pill"><div class="pill-label">Entrées</div><div class="pill-value income">+235 000 FCFA</div></div>
+        <div class="balance-pill"><div class="pill-label">Sorties</div><div class="pill-value expense">−147 500 FCFA</div></div>
+      </div>
+    </div>
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card"><div class="stat-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="stat-label">Entrées</div><div class="stat-value income">235 000</div><div class="stat-trend up">↑ +12%</div></div>
+      <div class="stat-card"><div class="stat-icon expense"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div><div class="stat-label">Sorties</div><div class="stat-value expense">147 500</div><div class="stat-trend down">↓ +5%</div></div>
+      <div class="stat-card"><div class="stat-icon count"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></div><div class="stat-label">Transactions</div><div class="stat-value neutral">14</div><div class="stat-trend up">↑ +2</div></div>
+      <div class="stat-card"><div class="stat-icon avg"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="stat-label">Moy. sortie</div><div class="stat-value neutral">18 438</div><div class="stat-trend">/ transaction</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="chart-card">
+        <div class="card-header"><span class="card-title">Évolution 6 mois</span><span class="card-badge">Jan–Juin</span></div>
+        <canvas id="lineChart-t" height="160"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-header"><span class="card-title">Répartition sorties</span><span class="card-badge">Juin</span></div>
+        <table class="cat-table"><thead><tr><th>Catégorie</th><th>FCFA</th><th>%</th></tr></thead><tbody id="cat-table-t"></tbody></table>
+      </div>
+    </div>
+    <div class="export-card" style="margin-top:16px">
+      <div class="export-title">Exporter le rapport PDF</div>
+      <div class="export-sub">Rapport complet de Juin 2026 avec toutes les transactions.</div>
+      <div class="export-preview">
+        <div class="export-preview-row"><span class="export-preview-label">Période</span><span class="export-preview-value">Juin 2026</span></div>
+        <div class="export-preview-row"><span class="export-preview-label">Entrées</span><span class="export-preview-value income">+235 000 FCFA</span></div>
+        <div class="export-preview-row"><span class="export-preview-label">Sorties</span><span class="export-preview-value expense">−147 500 FCFA</span></div>
+        <div class="export-preview-row"><span class="export-preview-label">Solde net</span><span class="export-preview-value income">+87 500 FCFA</span></div>
+      </div>
+      <button class="btn-export" onclick="simulateExport('t')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger en PDF</button>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <a href="owomi_dashboard.html" class="tab-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Accueil</a>
+    <a href="owomi_transactions.html" class="tab-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>Transactions</a>
+    <button class="tab-fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <a href="#" class="tab-item active"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>Profil</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- DESKTOP                              -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-desktop">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo"><a href="owomi_dashboard.html" class="logo-mini"><div class="logo-mark"><div class="logo-inner"><div class="logo-dot"></div></div></div><div class="logo-name">OWO<span>MI</span></div></a></div>
+      <div class="nav-section">
+        <div class="nav-label">Principal</div>
+        <a href="owomi_dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Tableau de bord</a>
+        <a href="owomi_transactions.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>Transactions</a>
+        <a href="#" class="nav-item active"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Gestion</div>
+        <a href="owomi_categories.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Catégories</a>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>Paramètres</a>
+      </div>
+      <div class="sidebar-footer"><div class="user-card"><div class="avatar">VN</div><div class="user-info"><div class="user-name">Nicodème V.</div><div class="user-devise">XOF — FCFA</div></div><button class="logout-btn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button></div></div>
+    </div>
+
+    <div class="content-area">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <div><div style="font-size:13px;color:var(--gris);margin-bottom:2px">Analyse financière</div><div class="page-title" style="font-size:24px">Rapports</div></div>
+        <div class="period-row" style="gap:8px">
+          <button class="period-arrow">&#8249;</button>
+          <div class="period-current" style="font-size:16px">Juin 2026</div>
+          <button class="period-arrow">&#8250;</button>
+          <select class="period-select" style="max-width:100px"><option>2026</option><option>2025</option><option>2024</option></select>
+        </div>
+      </div>
+
+      <div class="desktop-grid">
+        <div class="left-col">
+          <div class="balance-card">
+            <div class="balance-accent"></div>
+            <div class="balance-label">Solde net du mois</div>
+            <div class="balance-amount" style="font-size:38px">87 500 FCFA</div>
+            <div class="balance-sub">Juin 2026 · 14 transactions</div>
+            <div class="balance-pills">
+              <div class="balance-pill"><div class="pill-label">Entrées</div><div class="pill-value income">+235 000 FCFA</div></div>
+              <div class="balance-pill"><div class="pill-label">Sorties</div><div class="pill-value expense">−147 500 FCFA</div></div>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon income"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div><div class="stat-label">Total entrées</div><div class="stat-value income">235 000 FCFA</div><div class="stat-trend up">↑ +12% vs mai</div></div>
+            <div class="stat-card"><div class="stat-icon expense"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div><div class="stat-label">Total sorties</div><div class="stat-value expense">147 500 FCFA</div><div class="stat-trend down">↑ +5% vs mai</div></div>
+            <div class="stat-card"><div class="stat-icon count"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg></div><div class="stat-label">Transactions</div><div class="stat-value neutral">14</div><div class="stat-trend up">↑ +2 vs mai</div></div>
+            <div class="stat-card"><div class="stat-icon avg"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="stat-label">Moy. par sortie</div><div class="stat-value neutral">18 438 FCFA</div><div class="stat-trend">par transaction</div></div>
+          </div>
+          <div class="chart-card">
+            <div class="card-header"><span class="card-title">Évolution sur 6 mois</span><span class="card-badge">Janvier — Juin 2026</span></div>
+            <canvas id="lineChart-d" height="120"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="card-header"><span class="card-title">Répartition des sorties par catégorie</span><span class="card-badge">Juin 2026</span></div>
+            <table class="cat-table"><thead><tr><th>Catégorie</th><th>Montant (FCFA)</th><th style="min-width:120px">Part</th><th>%</th></tr></thead><tbody id="cat-table-d"></tbody></table>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div class="export-card" style="position:sticky;top:32px">
+            <div class="export-title">Rapport PDF — Juin 2026</div>
+            <div class="export-sub">Exportez le rapport complet avec le détail de toutes vos transactions.</div>
+            <div class="export-preview">
+              <div class="export-preview-row"><span class="export-preview-label">Utilisateur</span><span class="export-preview-value">Nicodème VODOUNNOU</span></div>
+              <div class="export-preview-row"><span class="export-preview-label">Période</span><span class="export-preview-value">Juin 2026</span></div>
+              <div class="export-preview-row"><span class="export-preview-label">Entrées</span><span class="export-preview-value income">+235 000 FCFA</span></div>
+              <div class="export-preview-row"><span class="export-preview-label">Sorties</span><span class="export-preview-value expense">−147 500 FCFA</span></div>
+              <div class="export-preview-row"><span class="export-preview-label">Transactions</span><span class="export-preview-value">14</span></div>
+              <div class="export-preview-row"><span class="export-preview-label">Solde net</span><span class="export-preview-value income">+87 500 FCFA</span></div>
+            </div>
+            <button class="btn-export" id="export-btn-d" onclick="simulateExport('d')">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Télécharger en PDF
+            </button>
+
+            <!-- Historique des exports -->
+            <div style="margin-top:20px;padding-top:16px;border-top:.5px solid #F2F0EB">
+              <div style="font-size:12px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Exports récents</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg);border-radius:8px">
+                  <div><div style="font-size:12px;font-weight:500;color:var(--nuit)">Rapport Mai 2026</div><div style="font-size:10px;color:var(--gris)">Généré le 02 juin 2026</div></div>
+                  <button style="background:none;border:none;cursor:pointer;padding:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg);border-radius:8px">
+                  <div><div style="font-size:12px;font-weight:500;color:var(--nuit)">Rapport Avr 2026</div><div style="font-size:10px;color:var(--gris)">Généré le 01 mai 2026</div></div>
+                  <button style="background:none;border:none;cursor:pointer;padding:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DONNÉES ──
+const months = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+let currentMonth = 5;
+
+const catData = [
+  {name:'Alimentation',color:'#D85A30',amount:47000,pct:32},
+  {name:'Logement',   color:'#185FA5',amount:45000,pct:30},
+  {name:'Transport',  color:'#D49E10',amount:20000,pct:14},
+  {name:'Loisirs',    color:'#1D9E75',amount:24000,pct:16},
+  {name:'Santé',      color:'#888780',amount:11500,pct:8},
+];
+
+function renderCatTable(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.innerHTML=catData.map(c=>`
+    <tr>
+      <td><span class="cat-dot" style="background:${c.color}"></span>${c.name}</td>
+      <td style="font-family:var(--fd);font-weight:600">${c.amount.toLocaleString()}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="cat-bar-wrap"><div class="cat-bar" style="width:${c.pct}%;background:${c.color}"></div></div>
+          <span class="cat-pct">${c.pct}%</span>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// ── GRAPHIQUE LIGNE ──
+const lineData = {
+  labels:['Jan','Fév','Mar','Avr','Mai','Juin'],
+  income: [180000,210000,195000,220000,185000,235000],
+  expense:[120000,145000,130000,160000,140000,147500],
+};
+function makeLineChart(id){
+  const ctx=document.getElementById(id);
+  if(!ctx) return;
+  new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:lineData.labels,
+      datasets:[
+        {label:'Entrées',data:lineData.income,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,.08)',tension:.4,pointRadius:4,pointBackgroundColor:'#1D9E75',borderWidth:2,fill:true},
+        {label:'Sorties',data:lineData.expense,borderColor:'#D85A30',backgroundColor:'rgba(216,90,48,.06)',tension:.4,pointRadius:4,pointBackgroundColor:'#D85A30',borderWidth:2,fill:true},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toLocaleString()+' FCFA'}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#888780',font:{size:11}}},
+        y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{color:'#888780',font:{size:11},callback:v=>(v/1000)+'k'}}
+      }
+    }
+  });
+}
+
+// ── EXPORT SIMULATION ──
+function simulateExport(suffix){
+  const btn=document.getElementById('export-btn-'+suffix);
+  if(!btn) return;
+  btn.classList.add('loading');
+  btn.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" style="animation:spin 1s linear infinite" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Génération en cours…';
+  setTimeout(()=>{
+    btn.classList.remove('loading');
+    btn.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Télécharger en PDF';
+    showToast('✓ Rapport PDF généré — OWOMI_Rapport_Juin2026.pdf');
+  },1800);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show','success');
+  setTimeout(()=>t.classList.remove('show','success'),3500);
+}
+
+// ── PÉRIODE ──
+function changePeriod(dir){
+  currentMonth=Math.max(0,Math.min(11,currentMonth+dir));
+  const el=document.getElementById('period-label-m');
+  if(el) el.textContent=months[currentMonth]+' 2026';
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  makeLineChart('lineChart-m');
+  makeLineChart('lineChart-t');
+  makeLineChart('lineChart-d');
+  renderCatTable('cat-table-m');
+  renderCatTable('cat-table-t');
+  renderCatTable('cat-table-d');
+});
+</script>
+
+<style>
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</body>
+</html>

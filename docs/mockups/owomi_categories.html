@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OWOMI — Catégories</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --nuit:   #0C131E; --nuit-d: #1A2235; --nuit-c: #243047;
+  --or:     #D49E10; --vert:   #1D9E75; --corail: #D85A30;
+  --rouge:  #E24B4A; --blanc:  #FFFFFF; --gris:   #888780;
+  --bg:     #F7F5F0; --fd: 'Sora',sans-serif; --fb: 'Plus Jakarta Sans',sans-serif;
+}
+html,body{width:100%;min-height:100%;font-family:var(--fb);background:var(--bg);color:var(--nuit);}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--nuit);display:flex;flex-direction:column;z-index:100;padding:0 0 24px;}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:.5px solid rgba(255,255,255,.06);margin-bottom:8px;}
+.logo-mini{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-mark{width:34px;height:34px;border-radius:9px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-inner{width:17px;height:17px;border-radius:50%;background:var(--nuit);display:flex;align-items:center;justify-content:center;}
+.logo-dot{width:6px;height:6px;border-radius:50%;background:var(--or);}
+.logo-name{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--blanc);letter-spacing:.04em;}
+.logo-name span{color:var(--or);}
+.nav-section{padding:0 12px;margin-bottom:4px;}
+.nav-label{font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;padding:8px 8px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);text-decoration:none;cursor:pointer;transition:all .15s;margin-bottom:2px;}
+.nav-item svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);}
+.nav-item.active{background:rgba(212,158,16,.15);color:var(--or);}
+.nav-item.active svg{stroke:var(--or);}
+.sidebar-footer{margin-top:auto;padding:0 12px;border-top:.5px solid rgba(255,255,255,.06);padding-top:16px;}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.07);}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:13px;font-weight:700;color:var(--nuit);flex-shrink:0;}
+.user-info{flex:1;min-width:0;}
+.user-name{font-size:12px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-devise{font-size:10px;color:rgba(255,255,255,.3);}
+.logout-btn{background:none;border:none;cursor:pointer;padding:4px;}
+.logout-btn svg{width:14px;height:14px;stroke:rgba(255,255,255,.25);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── TOP BAR ── */
+.top-bar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--nuit);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:99;border-bottom:.5px solid rgba(255,255,255,.06);}
+.top-avatar{width:32px;height:32px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:12px;font-weight:700;color:var(--nuit);}
+
+/* ── TAB BAR ── */
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--nuit);display:flex;align-items:center;border-top:.5px solid rgba(255,255,255,.06);z-index:100;padding:0 8px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:500;color:rgba(255,255,255,.4);cursor:pointer;transition:all .15s;text-decoration:none;}
+.tab-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.tab-item.active{color:var(--or);}
+.tab-item.active svg{stroke:var(--or);}
+.tab-fab{width:48px;height:48px;border-radius:50%;background:var(--or);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin:0 8px;box-shadow:0 4px 16px rgba(212,158,16,.35);}
+.tab-fab svg{width:22px;height:22px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.page-title{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--nuit);}
+.btn-add{display:flex;align-items:center;gap:6px;background:var(--or);color:var(--nuit);border:none;border-radius:10px;padding:9px 16px;font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.btn-add:hover{opacity:.9;}
+.btn-add svg{width:15px;height:15px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── SECTION TITLE ── */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.section-title{font-size:13px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;}
+.section-count{font-size:12px;color:var(--gris);background:rgba(0,0,0,.06);padding:2px 8px;border-radius:20px;}
+
+/* ── GRID CATÉGORIES ── */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:24px;}
+.cat-card{background:var(--blanc);border-radius:14px;padding:16px 14px;border:.5px solid rgba(0,0,0,.06);cursor:pointer;transition:all .15s;position:relative;}
+.cat-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08);}
+.cat-card.default{opacity:.85;}
+.cat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.cat-icon svg{width:20px;height:20px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.cat-name{font-size:13px;font-weight:600;color:var(--nuit);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cat-type{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;display:inline-block;}
+.cat-type.income{background:#E1F5EE;color:#085041;}
+.cat-type.expense{background:#FAECE7;color:#4A1B0C;}
+.cat-actions{position:absolute;top:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .15s;}
+.cat-card:hover .cat-actions{opacity:1;}
+.cat-action-btn{width:26px;height:26px;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.cat-action-btn svg{width:13px;height:13px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.cat-action-btn.edit{background:rgba(0,0,0,.06);}
+.cat-action-btn.edit svg{stroke:var(--gris);}
+.cat-action-btn.edit:hover{background:rgba(212,158,16,.15);}
+.cat-action-btn.edit:hover svg{stroke:var(--or);}
+.cat-action-btn.del{background:rgba(0,0,0,.06);}
+.cat-action-btn.del svg{stroke:var(--gris);}
+.cat-action-btn.del:hover{background:rgba(226,75,74,.12);}
+.cat-action-btn.del:hover svg{stroke:var(--rouge);}
+.cat-lock{position:absolute;top:8px;right:8px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+.cat-lock svg{width:12px;height:12px;stroke:var(--gris);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.cat-tx-count{font-size:10px;color:var(--gris);margin-top:4px;}
+
+/* ── BADGE DÉFAUT ── */
+.badge-default{position:absolute;top:8px;left:8px;font-size:9px;font-weight:600;color:var(--gris);background:rgba(0,0,0,.06);padding:2px 6px;border-radius:4px;letter-spacing:.04em;}
+
+/* ── ÉTAT VIDE ── */
+.empty-state{background:var(--blanc);border-radius:14px;padding:40px 24px;text-align:center;border:.5px solid rgba(0,0,0,.06);}
+.empty-icon{width:56px;height:56px;border-radius:16px;background:rgba(212,158,16,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.empty-icon svg{width:24px;height:24px;stroke:var(--or);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.empty-title{font-size:15px;font-weight:600;color:var(--nuit);margin-bottom:6px;}
+.empty-sub{font-size:13px;color:var(--gris);margin-bottom:16px;}
+.btn-empty{display:inline-flex;align-items:center;gap:6px;background:var(--or);color:var(--nuit);border:none;border-radius:10px;padding:10px 18px;font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;}
+.btn-empty svg{width:14px;height:14px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+.modal-overlay.hidden{display:none;}
+.modal-overlay.desktop-modal{align-items:center;}
+.modal{background:var(--blanc);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.modal.desktop{border-radius:20px;padding:28px 32px;}
+.modal-handle{width:36px;height:4px;background:#E8E6DF;border-radius:2px;margin:0 auto 20px;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--nuit);}
+.modal-close{background:none;border:none;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:var(--bg);}
+.modal-close svg{width:18px;height:18px;stroke:var(--gris);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.modal-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.modal-label{font-size:13px;font-weight:500;color:rgba(0,0,0,.6);}
+.modal-input{width:100%;height:46px;border-radius:10px;border:.5px solid rgba(0,0,0,.12);background:var(--bg);font-family:var(--fb);font-size:14px;color:var(--nuit);padding:0 14px;outline:none;transition:border-color .2s;}
+.modal-input:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(212,158,16,.12);}
+.modal-input::placeholder{color:var(--gris);}
+.modal-select{width:100%;height:46px;border-radius:10px;border:.5px solid rgba(0,0,0,.12);background:var(--bg);font-family:var(--fb);font-size:14px;color:var(--nuit);padding:0 14px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;}
+.modal-select:focus{border-color:var(--or);}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.btn-modal-submit{width:100%;height:50px;border-radius:12px;background:var(--or);color:var(--nuit);font-family:var(--fb);font-size:15px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;margin-top:8px;}
+.btn-modal-submit:hover{opacity:.9;}
+
+/* Sélecteur couleur */
+.color-picker{display:flex;gap:8px;flex-wrap:wrap;}
+.color-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;}
+.color-dot:hover{transform:scale(1.15);}
+.color-dot.selected{border-color:var(--nuit);transform:scale(1.1);}
+
+/* Sélecteur icône */
+.icon-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+.icon-opt{width:100%;aspect-ratio:1;border-radius:9px;border:.5px solid rgba(0,0,0,.1);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+.icon-opt svg{width:16px;height:16px;stroke:var(--gris);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.icon-opt:hover{background:#E8E6DF;}
+.icon-opt.selected{background:var(--nuit);border-color:var(--nuit);}
+.icon-opt.selected svg{stroke:var(--or);}
+
+/* ── FAB DESKTOP ── */
+.fab-desktop{position:fixed;bottom:32px;right:32px;width:52px;height:52px;border-radius:50%;background:var(--or);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(212,158,16,.4);transition:transform .15s;z-index:50;}
+.fab-desktop:hover{transform:scale(1.08);}
+.fab-desktop svg{width:22px;height:22px;stroke:var(--nuit);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── LAYOUTS ── */
+.layout-mobile{display:block;}
+.layout-mobile .main{padding:72px 16px 80px;}
+.layout-tablet{display:none;}
+.layout-tablet .main{padding:80px 24px 80px;max-width:720px;margin:0 auto;}
+.layout-desktop{display:none;}
+.layout-desktop .app-shell{display:flex;min-height:100vh;}
+.layout-desktop .content-area{margin-left:220px;flex:1;padding:32px;min-height:100vh;}
+.layout-desktop .top-bar,.layout-desktop .tab-bar{display:none;}
+.layout-desktop .cat-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+
+@media(min-width:640px)and(max-width:1023px){
+  .layout-mobile{display:none;}
+  .layout-tablet{display:block;}
+  .cat-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+}
+@media(min-width:1024px){
+  .layout-mobile{display:none;}
+  .layout-tablet{display:none;}
+  .layout-desktop{display:block;}
+}
+</style>
+</head>
+<body>
+
+<!-- Données catégories -->
+<script>
+const CATS = {
+  default: [
+    {id:1,name:"Alimentation",type:"expense",color:"#D85A30",icon:"food",txCount:12},
+    {id:2,name:"Transport",type:"expense",color:"#185FA5",icon:"car",txCount:8},
+    {id:3,name:"Logement",type:"expense",color:"#854F0B",icon:"home",txCount:3},
+    {id:4,name:"Santé",type:"expense",color:"#1D9E75",icon:"health",txCount:2},
+    {id:5,name:"Loisirs",type:"expense",color:"#888780",icon:"game",txCount:5},
+    {id:6,name:"Revenus",type:"income",color:"#1D9E75",icon:"income",txCount:6},
+  ],
+  custom: [
+    {id:7,name:"Épargne",type:"income",color:"#D49E10",icon:"save",txCount:2},
+    {id:8,name:"Éducation",type:"expense",color:"#534AB7",icon:"book",txCount:1},
+  ]
+};
+const ICONS = {
+  food:   '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><line x1="7" y1="2" x2="7" y2="11"/><path d="M21 15a2 2 0 01-2 2H7l-4 4V9a2 2 0 012-2h14a2 2 0 012 2v6z"/>',
+  car:    '<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+  home:   '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  health: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  game:   '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  income: '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
+  save:   '<path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
+  book:   '<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',
+};
+function getIcon(key){return ICONS[key]||ICONS.food;}
+
+function renderCatCard(cat,isDefault){
+  return `
+  <div class="cat-card${isDefault?' default':''}" onclick="editCat(${cat.id})">
+    ${isDefault?'<div class="badge-default">DÉFAUT</div>':''}
+    <div class="cat-icon" style="background:${cat.color}20">
+      <svg viewBox="0 0 24 24" style="stroke:${cat.color}">${getIcon(cat.icon)}</svg>
+    </div>
+    <div class="cat-name">${cat.name}</div>
+    <div class="cat-type ${cat.type}">${cat.type==='income'?'Entrée':'Sortie'}</div>
+    <div class="cat-tx-count">${cat.txCount} transaction${cat.txCount>1?'s':''}</div>
+    ${isDefault
+      ? '<div class="cat-lock"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>'
+      : `<div class="cat-actions">
+          <button class="cat-action-btn edit" onclick="event.stopPropagation();editCat(${cat.id})"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="cat-action-btn del" onclick="event.stopPropagation();delCat(${cat.id})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+        </div>`
+    }
+  </div>`;
+}
+
+function renderAll(){
+  ['m','t','d'].forEach(s=>{
+    const defEl = document.getElementById('def-grid-'+s);
+    const cusEl = document.getElementById('cus-grid-'+s);
+    if(defEl) defEl.innerHTML = CATS.default.map(c=>renderCatCard(c,true)).join('');
+    if(cusEl){
+      if(CATS.custom.length===0){
+        cusEl.innerHTML=`<div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+          <div class="empty-title">Aucune catégorie personnalisée</div>
+          <div class="empty-sub">Créez vos propres catégories pour mieux organiser vos transactions.</div>
+          <button class="btn-empty" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Créer une catégorie</button>
+        </div>`;
+      } else {
+        cusEl.innerHTML = CATS.custom.map(c=>renderCatCard(c,false)).join('');
+      }
+    }
+  });
+}
+</script>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MOBILE                               -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-mobile">
+  <div class="top-bar">
+    <div class="logo-mini">
+      <div class="logo-mark" style="width:28px;height:28px;border-radius:8px"><div class="logo-inner" style="width:14px;height:14px"><div class="logo-dot" style="width:5px;height:5px"></div></div></div>
+      <span class="logo-name" style="font-size:16px;color:var(--blanc)">OWO<span>MI</span></span>
+    </div>
+    <div class="top-avatar">VN</div>
+  </div>
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">Catégories</div>
+      <button class="btn-add" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Créer</button>
+    </div>
+    <div class="section-head"><span class="section-title">Par défaut</span><span class="section-count">6</span></div>
+    <div class="cat-grid" id="def-grid-m"></div>
+    <div class="section-head"><span class="section-title">Personnalisées</span><span class="section-count" id="cus-count-m">2</span></div>
+    <div class="cat-grid" id="cus-grid-m"></div>
+  </div>
+  <div class="tab-bar">
+    <a href="owomi_dashboard.html" class="tab-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Accueil</a>
+    <a href="owomi_transactions.html" class="tab-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+    <button class="tab-fab" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+    <a href="#" class="tab-item active"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Catégories</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- TABLET                               -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-tablet">
+  <div class="top-bar">
+    <div class="logo-mini"><div class="logo-mark" style="width:30px;height:30px;border-radius:9px"><div class="logo-inner" style="width:15px;height:15px"><div class="logo-dot" style="width:6px;height:6px"></div></div></div><span class="logo-name" style="color:var(--blanc)">OWO<span>MI</span></span></div>
+    <div class="top-avatar">VN</div>
+  </div>
+  <div class="main">
+    <div class="page-header"><div class="page-title">Catégories</div><button class="btn-add" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Créer une catégorie</button></div>
+    <div class="section-head"><span class="section-title">Par défaut</span><span class="section-count">6</span></div>
+    <div class="cat-grid" id="def-grid-t"></div>
+    <div class="section-head"><span class="section-title">Personnalisées</span><span class="section-count">2</span></div>
+    <div class="cat-grid" id="cus-grid-t"></div>
+  </div>
+  <div class="tab-bar">
+    <a href="owomi_dashboard.html" class="tab-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Accueil</a>
+    <a href="owomi_transactions.html" class="tab-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+    <button class="tab-fab" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <a href="#" class="tab-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+    <a href="#" class="tab-item active"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Catégories</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- DESKTOP                              -->
+<!-- ══════════════════════════════════════ -->
+<div class="layout-desktop">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo"><a href="owomi_dashboard.html" class="logo-mini"><div class="logo-mark"><div class="logo-inner"><div class="logo-dot"></div></div></div><div class="logo-name">OWO<span>MI</span></div></a></div>
+      <div class="nav-section">
+        <div class="nav-label">Principal</div>
+        <a href="owomi_dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Tableau de bord</a>
+        <a href="owomi_transactions.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Rapports</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Gestion</div>
+        <a href="#" class="nav-item active"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Catégories</a>
+        <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>Paramètres</a>
+      </div>
+      <div class="sidebar-footer"><div class="user-card"><div class="avatar">VN</div><div class="user-info"><div class="user-name">Nicodème V.</div><div class="user-devise">XOF — FCFA</div></div><button class="logout-btn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button></div></div>
+    </div>
+    <div class="content-area">
+      <div class="page-header" style="margin-bottom:24px">
+        <div><div style="font-size:13px;color:var(--gris);margin-bottom:2px">Gestion</div><div class="page-title" style="font-size:24px">Catégories</div></div>
+        <button class="btn-add" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Créer une catégorie</button>
+      </div>
+      <div class="section-head"><span class="section-title">Par défaut</span><span class="section-count">6 catégories</span></div>
+      <div class="cat-grid" id="def-grid-d"></div>
+      <div class="section-head" style="margin-top:8px"><span class="section-title">Personnalisées</span><span class="section-count">2 catégories</span></div>
+      <div class="cat-grid" id="cus-grid-d"></div>
+    </div>
+  </div>
+  <button class="fab-desktop" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODAL CRÉATION CATÉGORIE             -->
+<!-- ══════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title-text">Nouvelle catégorie</div>
+      <button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <div class="modal-group">
+      <label class="modal-label">Nom de la catégorie</label>
+      <input class="modal-input" type="text" placeholder="Ex: Épargne, Éducation..." id="catName">
+    </div>
+
+    <div class="modal-row">
+      <div class="modal-group">
+        <label class="modal-label">Type</label>
+        <select class="modal-select" id="catType">
+          <option value="expense">Sortie d'argent</option>
+          <option value="income">Entrée d'argent</option>
+        </select>
+      </div>
+      <div class="modal-group">
+        <label class="modal-label">Aperçu</label>
+        <div id="catPreview" style="height:46px;border-radius:10px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;border:.5px solid rgba(0,0,0,.06)">
+          <span style="font-size:13px;font-weight:600;color:#085041" id="previewText">Nouvelle</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-group">
+      <label class="modal-label">Couleur</label>
+      <div class="color-picker">
+        <div class="color-dot selected" style="background:#D85A30" onclick="selectColor('#D85A30',this)"></div>
+        <div class="color-dot" style="background:#185FA5" onclick="selectColor('#185FA5',this)"></div>
+        <div class="color-dot" style="background:#D49E10" onclick="selectColor('#D49E10',this)"></div>
+        <div class="color-dot" style="background:#1D9E75" onclick="selectColor('#1D9E75',this)"></div>
+        <div class="color-dot" style="background:#534AB7" onclick="selectColor('#534AB7',this)"></div>
+        <div class="color-dot" style="background:#993C1D" onclick="selectColor('#993C1D',this)"></div>
+        <div class="color-dot" style="background:#0C131E" onclick="selectColor('#0C131E',this)"></div>
+        <div class="color-dot" style="background:#888780" onclick="selectColor('#888780',this)"></div>
+      </div>
+    </div>
+
+    <div class="modal-group">
+      <label class="modal-label">Icône</label>
+      <div class="icon-grid">
+        <div class="icon-opt selected" onclick="selectIcon('food',this)"><svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><line x1="7" y1="2" x2="7" y2="11"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('car',this)"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('home',this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('health',this)"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('game',this)"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('income',this)"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('save',this)"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('book',this)"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('star',this)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('gift',this)"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('phone',this)"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.15 9.83 19.79 19.79 0 01.08 1.2 2 2 0 012.05 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/></svg></div>
+        <div class="icon-opt" onclick="selectIcon('tool',this)"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
+      </div>
+    </div>
+
+    <button class="btn-modal-submit" onclick="saveCategory()">Créer la catégorie</button>
+  </div>
+</div>
+
+<script>
+let selectedColor = '#D85A30';
+let selectedIcon = 'food';
+
+function openModal(){ 
+  const o=document.getElementById('modalOverlay');
+  o.classList.remove('hidden');
+  if(window.innerWidth>=1024) o.classList.add('desktop-modal');
+  const modal=document.getElementById('modal');
+  if(window.innerWidth>=1024) modal.classList.add('desktop');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.add('hidden'); }
+function handleOverlayClick(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+
+function selectColor(color,el){
+  selectedColor=color;
+  document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+  updatePreview();
+}
+function selectIcon(icon,el){
+  selectedIcon=icon;
+  document.querySelectorAll('.icon-opt').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function updatePreview(){
+  const name=document.getElementById('catName').value||'Nouvelle';
+  const preview=document.getElementById('catPreview');
+  const text=document.getElementById('previewText');
+  preview.style.background=selectedColor+'20';
+  text.style.color=selectedColor;
+  text.textContent=name;
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const nameInput=document.getElementById('catName');
+  if(nameInput) nameInput.addEventListener('input',updatePreview);
+  renderAll();
+});
+
+function saveCategory(){
+  const name=document.getElementById('catName').value.trim();
+  if(!name){alert('Veuillez saisir un nom.');return;}
+  CATS.custom.push({id:Date.now(),name,type:document.getElementById('catType').value,color:selectedColor,icon:selectedIcon,txCount:0});
+  renderAll();
+  closeModal();
+  document.getElementById('catName').value='';
+}
+
+function editCat(id){
+  const all=[...CATS.default,...CATS.custom];
+  const cat=all.find(c=>c.id===id);
+  if(!cat||CATS.default.find(c=>c.id===id)){return;}
+  document.getElementById('catName').value=cat.name;
+  document.getElementById('catType').value=cat.type;
+  document.getElementById('modal-title-text').textContent='Modifier la catégorie';
+  openModal();
+}
+
+function delCat(id){
+  if(!confirm('Supprimer cette catégorie ?')) return;
+  CATS.custom=CATS.custom.filter(c=>c.id!==id);
+  renderAll();
+}
+</script>
+</body>
+</html>

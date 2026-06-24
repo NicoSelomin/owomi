@@ -28,7 +28,10 @@
       "Bash(curl -s -w '\\\\n[HTTP %{http_code}]\\\\n' http://localhost:8080/api/health -H 'Authorization: Bearer __CMDSUB_OUTPUT__')",
       "Bash(curl -s -w '\\\\n[HTTP %{http_code}]\\\\n' http://localhost:8080/api/health)",
       "Bash(curl -s -w '\\\\n[HTTP %{http_code}]\\\\n' -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@owomi.dev\",\"password\":\"WrongPass1\"}')",
-      "Bash(./mvnw *)"
+      "Bash(./mvnw *)",
+      "Bash(node scrolltest.mjs)",
+      "Bash(node scrollverify.mjs)",
+      "Bash(node hostscroll.mjs)"
     ]
   }
 }
