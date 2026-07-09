@@ -1,16 +1,18 @@
 package dev.selonick.owomi.common.exception;
 
-import dev.selonick.owomi.common.response.ApiResponse;
+import dev.selonick.owomi.common.api.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 
@@ -66,6 +68,15 @@ public class GlobalExceptionHandler {
                         "Paramètre obligatoire manquant : " + ex.getParameterName()));
     }
 
+    /** Erreurs de conversion des paramètres (ex : enum invalide dans une query string). */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String detail = "Paramètre invalide : " + ex.getName();
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.name(), "Données invalides.", List.of(detail)));
+    }
+
     /** Accès refusé par Spring Security (403). */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
@@ -73,6 +84,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error(ErrorCode.ACCESS_DENIED.name(), ErrorCode.ACCESS_DENIED.getDefaultMessage()));
+    }
+
+    /** Échec d'authentification Spring Security (401). */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthentication(AuthenticationException ex) {
+        log.warn("Authentication failed: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ErrorCode.TOKEN_INVALID.name(), ErrorCode.TOKEN_INVALID.getDefaultMessage()));
     }
 
     /** Erreur générique — ne jamais exposer le détail technique à l'utilisateur. */

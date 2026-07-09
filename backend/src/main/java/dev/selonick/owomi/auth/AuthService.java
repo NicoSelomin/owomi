@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+
 /**
  * Logique métier de l'authentification : inscription, connexion, rafraîchissement, déconnexion.
  */
@@ -37,7 +39,9 @@ public class AuthService {
     /** Inscription d'un nouvel utilisateur. */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.email())) {
+        String normalizedEmail = normalizeEmail(request.email());
+
+        if (userRepository.existsByEmail(normalizedEmail)) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
@@ -46,8 +50,8 @@ public class AuthService {
                         "Devise inconnue : " + request.currencyCode()));
 
         User user = new User();
-        user.setName(request.name());
-        user.setEmail(request.email());
+        user.setName(request.name().trim());
+        user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setCurrency(currency);
         user.setRole(Role.USER);
@@ -73,7 +77,7 @@ public class AuthService {
      */
     @Transactional
     public void resendVerification(String email) {
-        emailVerificationService.resend(email);
+        emailVerificationService.resend(normalizeEmail(email));
     }
 
     /**
@@ -82,7 +86,7 @@ public class AuthService {
      */
     @Transactional
     public void forgotPassword(String email) {
-        passwordResetService.requestReset(email);
+        passwordResetService.requestReset(normalizeEmail(email));
     }
 
     /** Application d'un nouveau mot de passe à partir d'un token de réinitialisation. */
@@ -94,11 +98,18 @@ public class AuthService {
     /** Connexion par email / mot de passe. */
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
+        String normalizedEmail = normalizeEmail(request.email());
+
+        User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        }
+
+        if (!user.isEmailVerified()) {
+            throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED,
+                    "Votre adresse email n'est pas encore vérifiée. Vous pouvez demander un nouveau lien de vérification.");
         }
 
         log.info("User logged in: email={}", user.getEmail());
@@ -128,5 +139,9 @@ public class AuthService {
         String refreshToken = jwtService.generateRefreshToken(user);
         refreshTokenService.create(user, refreshToken);
         return new AuthResponse(accessToken, refreshToken, userMapper.toDto(user));
+    }
+
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 }

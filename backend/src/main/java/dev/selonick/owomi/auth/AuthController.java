@@ -7,7 +7,7 @@ import dev.selonick.owomi.auth.dto.RegisterRequest;
 import dev.selonick.owomi.auth.dto.ResendVerificationRequest;
 import dev.selonick.owomi.auth.dto.ResetPasswordRequest;
 import dev.selonick.owomi.auth.dto.TokenRequest;
-import dev.selonick.owomi.common.response.ApiResponse;
+import dev.selonick.owomi.common.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

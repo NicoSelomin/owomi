@@ -2,7 +2,7 @@ package dev.selonick.owomi.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.selonick.owomi.common.exception.ErrorCode;
-import dev.selonick.owomi.common.response.ApiResponse;
+import dev.selonick.owomi.common.api.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

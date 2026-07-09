@@ -1,7 +1,7 @@
 package dev.selonick.owomi.user;
 
 import dev.selonick.owomi.auth.CustomUserDetails;
-import dev.selonick.owomi.common.response.ApiResponse;
+import dev.selonick.owomi.common.api.ApiResponse;
 import dev.selonick.owomi.user.dto.UserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

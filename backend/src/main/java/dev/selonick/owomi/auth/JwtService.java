@@ -3,6 +3,7 @@ package dev.selonick.owomi.auth;
 import dev.selonick.owomi.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,8 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
+    private static final int MIN_SECRET_BYTES = 32;
+
     private final SecretKey signingKey;
     private final long accessExpiration;
     private final long refreshExpiration;
@@ -29,8 +32,7 @@ public class JwtService {
             @Value("${jwt.secret}") String jwtSecret,
             @Value("${jwt.access-expiration:3600000}") long accessExpiration,
             @Value("${jwt.refresh-expiration:604800000}") long refreshExpiration) {
-        // Le secret doit être au moins 256 bits (Base64). Une valeur vide fait échouer le démarrage volontairement.
-        this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        this.signingKey = buildSigningKey(jwtSecret);
         this.accessExpiration = accessExpiration;
         this.refreshExpiration = refreshExpiration;
     }
@@ -76,6 +78,25 @@ public class JwtService {
 
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).isBefore(Instant.now());
+    }
+
+    private SecretKey buildSigningKey(String jwtSecret) {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalArgumentException("JWT secret must be provided.");
+        }
+
+        byte[] decodedSecret;
+        try {
+            decodedSecret = Decoders.BASE64.decode(jwtSecret);
+        } catch (DecodingException | IllegalArgumentException ex) {
+            throw new IllegalArgumentException("JWT secret must be a valid Base64 value.", ex);
+        }
+
+        if (decodedSecret.length < MIN_SECRET_BYTES) {
+            throw new IllegalArgumentException("JWT secret must be at least 256 bits.");
+        }
+
+        return Keys.hmacShaKeyFor(decodedSecret);
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {
