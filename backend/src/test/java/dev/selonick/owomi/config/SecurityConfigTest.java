@@ -8,6 +8,8 @@ import dev.selonick.owomi.category.CategoryService;
 import dev.selonick.owomi.common.HealthController;
 import dev.selonick.owomi.currency.CurrencyController;
 import dev.selonick.owomi.currency.CurrencyService;
+import dev.selonick.owomi.transaction.TransactionController;
+import dev.selonick.owomi.transaction.TransactionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {HealthController.class, CurrencyController.class, CategoryController.class})
+@WebMvcTest(controllers = {
+        HealthController.class,
+        CurrencyController.class,
+        CategoryController.class,
+        TransactionController.class
+})
 @Import({
         SecurityConfig.class,
         CorsConfig.class,
@@ -51,6 +58,9 @@ class SecurityConfigTest {
 
     @MockitoBean
     private CategoryService categoryService;
+
+    @MockitoBean
+    private TransactionService transactionService;
 
     @MockitoBean
     private JpaMetamodelMappingContext jpaMappingContext;
@@ -99,6 +109,15 @@ class SecurityConfigTest {
     @DisplayName("SecurityConfig : protège /api/categories sans token")
     void categoriesEndpoint_WithoutToken_ShouldReturnUnauthorizedJson() throws Exception {
         mockMvc.perform(get("/api/categories").secure(true))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("TOKEN_INVALID"));
+    }
+
+    @Test
+    @DisplayName("SecurityConfig : protège /api/transactions sans token")
+    void transactionsEndpoint_WithoutToken_ShouldReturnUnauthorizedJson() throws Exception {
+        mockMvc.perform(get("/api/transactions").secure(true))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("TOKEN_INVALID"));
