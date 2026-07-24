@@ -87,7 +87,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/transactions/transaction-form.page').then((m) => m.TransactionFormPage),
       },
-      { path: 'categories', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'categories',
+        loadComponent: () =>
+          import('./features/categories/categories.page').then((m) => m.CategoriesPage),
+      },
+      {
+        path: 'categories/new',
+        loadComponent: () =>
+          import('./features/categories/category-form.page').then((m) => m.CategoryFormPage),
+      },
+      {
+        path: 'categories/:id/edit',
+        loadComponent: () =>
+          import('./features/categories/category-form.page').then((m) => m.CategoryFormPage),
+      },
       { path: 'reports', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'settings', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
