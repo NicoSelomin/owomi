@@ -1,0 +1,83 @@
+<main class="categories-page">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content pullingText="Tirer pour actualiser" refreshingText="Actualisation..."></ion-refresher-content>
+  </ion-refresher>
+
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Catégories</p>
+      <h1>Organisation des mouvements</h1>
+      <p class="subtitle">{{ categories().length }} catégorie(s)</p>
+    </div>
+    <a class="primary-action" routerLink="/app/categories/new">Ajouter</a>
+  </header>
+
+  <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()" novalidate>
+    <label>
+      Type
+      <select formControlName="type">
+        <option value="">Tous</option>
+        <option value="INCOME">Revenus</option>
+        <option value="EXPENSE">Dépenses</option>
+      </select>
+    </label>
+
+    <div class="filter-actions">
+      <button class="secondary-button" type="button" (click)="resetFilters()">Réinitialiser</button>
+      <button class="primary-button" type="submit">Filtrer</button>
+    </div>
+  </form>
+
+  @if (errorMessage()) {
+    <section class="error-state">
+      <p>{{ errorMessage() }}</p>
+      <button type="button" (click)="loadCategories()">Réessayer</button>
+    </section>
+  }
+
+  @if (isLoading()) {
+    <section class="category-skeleton" aria-label="Chargement des catégories">
+      @for (item of [1, 2, 3, 4]; track item) {
+        <div class="category-card">
+          <ion-skeleton-text animated class="skeleton-title"></ion-skeleton-text>
+          <ion-skeleton-text animated class="skeleton-line"></ion-skeleton-text>
+        </div>
+      }
+    </section>
+  } @else if (!hasCategories() && !errorMessage()) {
+    <section class="empty-state">
+      <div class="empty-icon">0</div>
+      <h2>Aucune catégorie</h2>
+      <p>Ajoutez une catégorie personnelle pour organiser vos transactions.</p>
+      <a class="primary-action" routerLink="/app/categories/new">Créer une catégorie</a>
+    </section>
+  } @else {
+    <ion-list class="category-list">
+      @for (category of categories(); track category.id) {
+        <ion-item lines="none" class="category-card">
+          <ion-label>
+            <div class="category-head">
+              <div class="category-title">
+                <span class="category-dot" [style.background]="category.color" aria-hidden="true">{{ category.icon }}</span>
+                <div>
+                  <h2>{{ category.name }}</h2>
+                  <p>{{ typeLabel(category.type) }}</p>
+                </div>
+              </div>
+              <span class="ownership-badge" [class.personal]="!category.isDefault">
+                {{ ownershipLabel(category) }}
+              </span>
+            </div>
+
+            @if (canManage(category)) {
+              <div class="category-actions">
+                <a [routerLink]="['/app/categories', category.id, 'edit']">Modifier</a>
+                <button type="button" (click)="confirmDelete(category)">Supprimer</button>
+              </div>
+            }
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  }
+</main>

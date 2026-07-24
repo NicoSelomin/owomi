@@ -1,0 +1,154 @@
+:host {
+  --nuit: #0C131E;
+  --or: #D49E10;
+  --corail: #D85A30;
+  --blanc: #FFFFFF;
+  --gris: #888780;
+  --ivoire: #F7F5F0;
+  --fd: 'Sora', sans-serif;
+  --fb: 'Plus Jakarta Sans', sans-serif;
+
+  background: var(--ivoire);
+  color: var(--nuit);
+  display: block;
+  font-family: var(--fb);
+  min-height: 100%;
+}
+
+* { box-sizing: border-box; }
+
+.transaction-form-page {
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 24px 20px 52px;
+}
+
+.page-header {
+  margin-bottom: 18px;
+}
+
+.back-link {
+  color: var(--or);
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  text-decoration: none;
+}
+
+h1 {
+  color: var(--nuit);
+  font-family: var(--fd);
+  font-size: 24px;
+  margin: 0 0 6px;
+}
+
+.page-header p,
+.hint {
+  color: var(--gris);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.form-card {
+  background: var(--blanc);
+  border: .5px solid rgba(0,0,0,.06);
+  border-radius: 14px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+label {
+  color: var(--gris);
+  display: grid;
+  font-size: 12px;
+  gap: 6px;
+}
+
+input,
+select,
+textarea {
+  background: #fff;
+  border: .5px solid rgba(12,19,30,.14);
+  border-radius: 10px;
+  color: var(--nuit);
+  font: inherit;
+  outline: none;
+  padding: 0 12px;
+}
+
+input,
+select {
+  min-height: 44px;
+}
+
+textarea {
+  line-height: 1.5;
+  padding: 12px;
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--or);
+  box-shadow: 0 0 0 3px rgba(212,158,16,.14);
+}
+
+.field-error,
+.alert-error {
+  color: var(--corail);
+  font-size: 12px;
+}
+
+.alert-error {
+  background: rgba(216,90,48,.1);
+  border: .5px solid rgba(216,90,48,.25);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.counter {
+  color: var(--gris);
+  font-size: 11px;
+  text-align: right;
+}
+
+.primary-button {
+  background: var(--nuit);
+  border: 0;
+  border-radius: 10px;
+  color: var(--blanc);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  min-height: 48px;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}
+
+.skeleton-line {
+  background: rgba(12,19,30,.08);
+  border-radius: 999px;
+  height: 14px;
+}
+
+.skeleton-line.title {
+  height: 28px;
+  max-width: 280px;
+}
+
+@media (min-width: 720px) {
+  .transaction-form-page {
+    padding: 40px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+}

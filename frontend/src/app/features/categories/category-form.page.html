@@ -1,0 +1,64 @@
+<main class="category-form-page">
+  <header class="page-header">
+    <a routerLink="/app/categories" class="back-link">Retour</a>
+    <h1>{{ pageTitle() }}</h1>
+    <p>Les catégories personnelles restent validées par le backend.</p>
+  </header>
+
+  @if (isLoading()) {
+    <section class="form-card">
+      <div class="skeleton-line title"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+    </section>
+  } @else {
+    <form class="form-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (errorMessage()) {
+        <div class="alert-error">{{ errorMessage() }}</div>
+      }
+
+      @if (isDefaultCategory()) {
+        <div class="alert-info">Cette catégorie par défaut n’est pas modifiable.</div>
+      }
+
+      <label>
+        Nom
+        <input formControlName="name" maxlength="100" placeholder="Transport">
+      </label>
+      @if (fieldError('name')) {
+        <span class="field-error">{{ fieldError('name') }}</span>
+      }
+
+      <label>
+        Type
+        <select formControlName="type">
+          <option value="EXPENSE">Dépense</option>
+          <option value="INCOME">Revenu</option>
+        </select>
+      </label>
+      @if (fieldError('type')) {
+        <span class="field-error">{{ fieldError('type') }}</span>
+      }
+
+      <label>
+        Icône
+        <input formControlName="icon" maxlength="50" placeholder="wallet">
+      </label>
+      @if (fieldError('icon')) {
+        <span class="field-error">{{ fieldError('icon') }}</span>
+      }
+
+      <label>
+        Couleur
+        <input type="color" formControlName="color" aria-label="Couleur de la catégorie">
+      </label>
+      @if (fieldError('color')) {
+        <span class="field-error">{{ fieldError('color') }}</span>
+      }
+
+      <button class="primary-button" type="submit" [disabled]="isSubmitting() || isDefaultCategory()">
+        {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+    </form>
+  }
+</main>

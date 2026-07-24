@@ -1,0 +1,77 @@
+<main class="transaction-form-page">
+  <header class="page-header">
+    <a routerLink="/app/transactions" class="back-link">Retour</a>
+    <h1>{{ pageTitle() }}</h1>
+    <p>Les règles de sécurité et de propriété restent validées par le backend.</p>
+  </header>
+
+  @if (isLoading()) {
+    <section class="form-card">
+      <div class="skeleton-line title"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+    </section>
+  } @else {
+    <form class="form-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (errorMessage()) {
+        <div class="alert-error">{{ errorMessage() }}</div>
+      }
+
+      <label>
+        Type
+        <select formControlName="type" (change)="onTypeChange()">
+          <option value="EXPENSE">Dépense</option>
+          <option value="INCOME">Revenu</option>
+        </select>
+      </label>
+      @if (fieldError('type')) {
+        <span class="field-error">{{ fieldError('type') }}</span>
+      }
+
+      <label>
+        Montant
+        <input inputmode="decimal" formControlName="amount" placeholder="12500.00">
+      </label>
+      @if (fieldError('amount')) {
+        <span class="field-error">{{ fieldError('amount') }}</span>
+      }
+
+      <label>
+        Catégorie
+        <select formControlName="categoryId">
+          <option value="">Sélectionner une catégorie</option>
+          @for (category of filteredCategories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </label>
+      @if (fieldError('categoryId')) {
+        <span class="field-error">{{ fieldError('categoryId') }}</span>
+      }
+      @if (!filteredCategories().length) {
+        <p class="hint">Aucune catégorie disponible pour ce type.</p>
+      }
+
+      <label>
+        Date
+        <input type="date" formControlName="date">
+      </label>
+      @if (fieldError('date')) {
+        <span class="field-error">{{ fieldError('date') }}</span>
+      }
+
+      <label>
+        Description
+        <textarea formControlName="note" rows="5" maxlength="1000" placeholder="Note facultative"></textarea>
+      </label>
+      <div class="counter">{{ form.controls.note.value.length }}/1000</div>
+      @if (fieldError('note')) {
+        <span class="field-error">{{ fieldError('note') }}</span>
+      }
+
+      <button class="primary-button" type="submit" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+    </form>
+  }
+</main>

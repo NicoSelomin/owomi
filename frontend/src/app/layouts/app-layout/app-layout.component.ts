@@ -46,8 +46,8 @@ export class AppLayoutComponent {
 
   readonly navigation: NavigationItem[] = [
     { label: 'Dashboard', route: '/app/dashboard' },
-    { label: 'Transactions', route: '/app/transactions', disabled: true },
-    { label: 'Catégories', route: '/app/categories', disabled: true },
+    { label: 'Transactions', route: '/app/transactions' },
+    { label: 'Catégories', route: '/app/categories' },
     { label: 'Rapports', route: '/app/reports', disabled: true },
     { label: 'Paramètres', route: '/app/settings', disabled: true },
   ];
