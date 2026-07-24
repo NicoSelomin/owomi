@@ -1,4 +1,4 @@
-package dev.selonick.owomi.common.response;
+package dev.selonick.owomi.common.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -8,7 +8,6 @@ import java.util.List;
 
 /**
  * Format de réponse uniforme pour toute l'API OWOMI.
- * Les champs nuls sont omis de la sérialisation JSON.
  */
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)

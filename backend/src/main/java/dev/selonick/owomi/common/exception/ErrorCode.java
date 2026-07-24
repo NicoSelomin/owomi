@@ -17,6 +17,7 @@ public enum ErrorCode {
     ACCESS_DENIED("Accès refusé.", HttpStatus.FORBIDDEN),
     RESOURCE_NOT_FOUND("Ressource introuvable.", HttpStatus.NOT_FOUND),
     VALIDATION_ERROR("Données invalides.", HttpStatus.BAD_REQUEST),
+    UNSUPPORTED_MEDIA_TYPE("Type de contenu non supporté.", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
     AMOUNT_INVALID("Le montant doit être supérieur à 0.", HttpStatus.BAD_REQUEST),
     FUTURE_DATE("La date ne peut pas être dans le futur.", HttpStatus.BAD_REQUEST),
     CATEGORY_HAS_TRANSACTIONS("Cette catégorie est liée à des transactions.", HttpStatus.CONFLICT),
