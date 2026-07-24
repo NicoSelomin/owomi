@@ -10,6 +10,7 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 PASSED_TESTS=()
 FAILED_TESTS=()
 ENV_ERRORS=()
+SKIPPED_TESTS=()
 
 timestamp="$(date +%Y%m%d%H%M%S)"
 EMAIL_A="owomi.manual.${timestamp}.a@example.test"
@@ -40,6 +41,11 @@ fail() {
 env_fail() {
   ENV_ERRORS+=("$1")
   printf '[ENV] %s\n' "$1"
+}
+
+skip() {
+  SKIPPED_TESTS+=("$1")
+  printf '[SKIP] %s\n' "$1"
 }
 
 sanitize_response() {
@@ -83,6 +89,23 @@ request_json() {
   curl "${args[@]}"
 }
 
+request_raw() {
+  local method="$1"
+  local path="$2"
+  local bearer="$3"
+  local out_file="$4"
+  local headers_file="$5"
+  local accept="${6:-text/csv}"
+  local -a args
+
+  args=(-sS -D "$headers_file" -o "$out_file" -w "%{http_code}" -X "$method" -H "Accept: ${accept}")
+  if [[ -n "$bearer" ]]; then
+    args+=(-H "Authorization: Bearer ${bearer}")
+  fi
+  args+=("${BASE_URL}${path}")
+  curl "${args[@]}"
+}
+
 assert_status() {
   local name="$1"
   local expected="$2"
@@ -119,6 +142,30 @@ assert_error_code() {
   fi
 
   fail "$name" "Code erreur attendu ${expected_code}. Reponse masquee: $(sanitize_response "$out_file" | tr '\n' ' ')"
+  return 1
+}
+
+assert_header_contains() {
+  local name="$1"
+  local headers_file="$2"
+  local header_name="$3"
+  local expected_value="$4"
+
+  if awk -v header="${header_name}:" -v expected="$expected_value" '
+    BEGIN { found = 0 }
+    tolower($0) ~ "^" tolower(header) {
+      line = $0
+      sub(/\r$/, "", line)
+      if (index(line, expected) > 0) {
+        found = 1
+      }
+    }
+    END { exit(found ? 0 : 1) }
+  ' "$headers_file"; then
+    return 0
+  fi
+
+  fail "$name" "Header ${header_name} ne contient pas ${expected_value}."
   return 1
 }
 
@@ -406,6 +453,64 @@ out="$TMP_DIR/transactions_filters.json"
 status="$(request_json GET "/api/transactions?type=EXPENSE&categoryId=${CATEGORY_ID_A}&startDate=${MONTH_START}&endDate=${MONTH_END}&page=0&size=20" "$ACCESS_TOKEN_A" "" "$out")"
 check_success "transactions filtres valides" "$status" "200" "$out"
 
+csv_out="$TMP_DIR/export_no_token.csv"
+csv_headers="$TMP_DIR/export_no_token_headers.txt"
+status="$(request_raw GET "/api/transactions/export/csv" "" "$csv_out" "$csv_headers" "application/json")"
+check_error "export CSV sans token" "$status" "401" "$csv_out" "TOKEN_INVALID"
+
+csv_out="$TMP_DIR/export_bad_token.csv"
+csv_headers="$TMP_DIR/export_bad_token_headers.txt"
+status="$(request_raw GET "/api/transactions/export/csv" "invalid.jwt.token" "$csv_out" "$csv_headers" "application/json")"
+check_error "export CSV token invalide" "$status" "401" "$csv_out" "TOKEN_INVALID"
+
+csv_out="$TMP_DIR/export_a.csv"
+csv_headers="$TMP_DIR/export_a_headers.txt"
+status="$(request_raw GET "/api/transactions/export/csv" "$ACCESS_TOKEN_A" "$csv_out" "$csv_headers")"
+if assert_status "export CSV utilisateur A" "200" "$status" "$csv_out" \
+  && assert_header_contains "export CSV Content-Type" "$csv_headers" "Content-Type" "text/csv" \
+  && assert_header_contains "export CSV Content-Disposition" "$csv_headers" "Content-Disposition" "attachment;" \
+  && grep -Fq "Manual expense <b>html-like</b>" "$csv_out" \
+  && ! grep -Fq "Isolation B" "$csv_out"; then
+  pass "export CSV utilisateur A"
+  pass "export CSV Content-Type"
+  pass "export CSV Content-Disposition"
+  pass "export CSV isolation utilisateur"
+else
+  fail "export CSV utilisateur A" "CSV invalide ou isolation utilisateur non respectee."
+fi
+
+csv_out="$TMP_DIR/export_period.csv"
+csv_headers="$TMP_DIR/export_period_headers.txt"
+status="$(request_raw GET "/api/transactions/export/csv?startDate=${MONTH_START}&endDate=${MONTH_END}&type=EXPENSE&categoryId=${CATEGORY_ID_A}" "$ACCESS_TOKEN_A" "$csv_out" "$csv_headers")"
+if assert_status "export CSV periode valide" "200" "$status" "$csv_out" && grep -Fq "Manual expense <b>html-like</b>" "$csv_out"; then
+  pass "export CSV periode valide"
+fi
+
+csv_out="$TMP_DIR/export_inverted.csv"
+csv_headers="$TMP_DIR/export_inverted_headers.txt"
+status="$(request_raw GET "/api/transactions/export/csv?startDate=${MONTH_END}&endDate=${MONTH_START}" "$ACCESS_TOKEN_A" "$csv_out" "$csv_headers" "application/json")"
+check_error "export CSV periode invalide" "$status" "400" "$csv_out" "VALIDATION_ERROR"
+
+body="$TMP_DIR/transaction_csv_injection.json"
+create_transaction_body "$body" "13.00" "EXPENSE" "$CATEGORY_ID_A" "$TODAY" '=HYPERLINK("http://example.test")'
+out="$TMP_DIR/transaction_csv_injection_out.json"
+status="$(request_json POST "/api/transactions" "$ACCESS_TOKEN_A" "$body" "$out")"
+check_success "export CSV creation note injection" "$status" "201" "$out"
+CSV_INJECTION_TRANSACTION_ID="$(jq -r '.data.id // empty' "$out")"
+
+csv_out="$TMP_DIR/export_injection.csv"
+csv_headers="$TMP_DIR/export_injection_headers.txt"
+status="$(request_raw GET "/api/transactions/export/csv?startDate=${MONTH_START}&endDate=${MONTH_END}&categoryId=${CATEGORY_ID_A}" "$ACCESS_TOKEN_A" "$csv_out" "$csv_headers")"
+if assert_status "export CSV protection injection" "200" "$status" "$csv_out" && grep -Fq "'=HYPERLINK" "$csv_out"; then
+  pass "export CSV protection injection"
+fi
+if [[ -n "$CSV_INJECTION_TRANSACTION_ID" ]]; then
+  cleanup_out="$TMP_DIR/transaction_csv_injection_delete.json"
+  request_json DELETE "/api/transactions/${CSV_INJECTION_TRANSACTION_ID}" "$ACCESS_TOKEN_A" "" "$cleanup_out" >/dev/null || true
+fi
+
+skip "export CSV depassement limite non teste manuellement sans surcharge volontaire"
+
 out="$TMP_DIR/transaction_detail.json"
 status="$(request_json GET "/api/transactions/${TRANSACTION_ID_A}" "$ACCESS_TOKEN_A" "" "$out")"
 check_success "transactions detail A" "$status" "200" "$out"
@@ -600,6 +705,7 @@ printf '\nResume tests manuels OWOMI:\n'
 printf ' - Reussis: %d\n' "${#PASSED_TESTS[@]}"
 printf ' - Echoues: %d\n' "${#FAILED_TESTS[@]}"
 printf ' - Erreurs environnement: %d\n' "${#ENV_ERRORS[@]}"
+printf ' - Ignores: %d\n' "${#SKIPPED_TESTS[@]}"
 
 if (( ${#FAILED_TESTS[@]} > 0 )); then
   printf '\nTests echoues:\n'

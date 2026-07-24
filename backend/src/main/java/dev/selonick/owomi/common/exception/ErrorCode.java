@@ -22,6 +22,7 @@ public enum ErrorCode {
     FUTURE_DATE("La date ne peut pas être dans le futur.", HttpStatus.BAD_REQUEST),
     CATEGORY_HAS_TRANSACTIONS("Cette catégorie est liée à des transactions.", HttpStatus.CONFLICT),
     CATEGORY_IS_DEFAULT("Cette catégorie par défaut ne peut pas être modifiée.", HttpStatus.CONFLICT),
+    EXPORT_LIMIT_EXCEEDED("L'export dépasse la limite autorisée.", HttpStatus.PAYLOAD_TOO_LARGE),
     RATE_LIMIT_EXCEEDED("Trop de requêtes. Réessayez dans quelques instants.", HttpStatus.TOO_MANY_REQUESTS),
     EMAIL_NOT_VERIFIED("Votre adresse email n'est pas encore vérifiée.", HttpStatus.FORBIDDEN),
     VERIFICATION_TOKEN_INVALID("Lien de vérification invalide.", HttpStatus.BAD_REQUEST),
