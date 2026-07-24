@@ -41,4 +41,24 @@ describe('DashboardService', () => {
     expect(categoryReq.request.method).toBe('GET');
     categoryReq.flush({ success: true, data: [], timestamp: '2026-01-01T00:00:00Z' });
   });
+
+  it('does not send empty optional date filters', () => {
+    service.getSummary({ startDate: undefined, endDate: undefined }).subscribe();
+
+    const req = httpMock.expectOne('http://localhost:8080/api/dashboard/summary');
+
+    expect(req.request.params.keys()).toEqual([]);
+    req.flush({
+      success: true,
+      data: {
+        incomeTotal: 0,
+        expenseTotal: 0,
+        balance: 0,
+        transactionCount: 0,
+        startDate: '2026-07-01',
+        endDate: '2026-07-31',
+      },
+      timestamp: '2026-01-01T00:00:00Z',
+    });
+  });
 });

@@ -6,49 +6,152 @@
   </a>
   <div class="top-bar-right">
     <div class="top-avatar">{{ initials() }}</div>
-    <button class="logout-btn" type="button" (click)="onLogout()" [disabled]="isLoggingOut()"
-            aria-label="Se déconnecter">
-      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-    </button>
   </div>
 </header>
 
 <!-- ── Contenu ── -->
 <main class="main">
+  <ion-refresher slot="fixed" (ionRefresh)="loadDashboard($event)">
+    <ion-refresher-content pullingText="Tirer pour actualiser" refreshingText="Actualisation..."></ion-refresher-content>
+  </ion-refresher>
+
   <div class="page-header">
     <div class="page-greeting">Bonjour 👋</div>
     <div class="page-title">{{ user()?.name ?? 'Bienvenue' }}</div>
+    <div class="page-subtitle">
+      @if (summary()) {
+        Période du {{ summary()?.startDate }} au {{ summary()?.endDate }}
+      } @else {
+        Vue financière du mois en cours
+      }
+    </div>
   </div>
 
-  <!-- Carte d'accueil -->
-  <section class="balance-card">
-    <div class="balance-accent"></div>
-    <div class="balance-label">Connecté en tant que</div>
-    <div class="balance-amount">{{ user()?.name ?? '—' }}</div>
-    <div class="balance-sub">{{ user()?.email ?? '' }}</div>
+  @if (isLoading()) {
+    <section class="balance-card">
+      <ion-skeleton-text animated class="skeleton-line skeleton-short"></ion-skeleton-text>
+      <ion-skeleton-text animated class="skeleton-line skeleton-title"></ion-skeleton-text>
+      <div class="metrics-grid">
+        <ion-skeleton-text animated class="skeleton-card"></ion-skeleton-text>
+        <ion-skeleton-text animated class="skeleton-card"></ion-skeleton-text>
+      </div>
+    </section>
+    <section class="panel">
+      <ion-skeleton-text animated class="skeleton-line skeleton-title"></ion-skeleton-text>
+      <ion-skeleton-text animated class="skeleton-line"></ion-skeleton-text>
+      <ion-skeleton-text animated class="skeleton-line"></ion-skeleton-text>
+    </section>
+  } @else if (errorMessage()) {
+    <section class="empty-state">
+      <div class="empty-icon">!</div>
+      <h2>Tableau de bord indisponible</h2>
+      <p>{{ errorMessage() }}</p>
+      <button class="btn-primary" type="button" (click)="loadDashboard()">Réessayer</button>
+    </section>
+  } @else if (data()) {
+    <section class="balance-card">
+      <div class="balance-accent"></div>
+      <div class="balance-label">Solde de la période</div>
+      <div class="balance-amount">{{ formatAmount(summary()?.balance) }}</div>
+      <div class="balance-sub">
+        {{ summary()?.transactionCount ?? 0 }} transaction(s)
+        @if (user()?.currency?.code) {
+          · {{ user()?.currency?.code }}
+        }
+      </div>
 
-    <div class="info-pills">
-      <div class="info-pill">
-        <div class="pill-label">Devise</div>
-        <div class="pill-value">
-          {{ user()?.currency?.code ?? '—' }}
-          @if (user()?.currency?.symbol) {
-            <span class="pill-symbol">{{ user()?.currency?.symbol }}</span>
-          }
+      <div class="metrics-grid">
+        <div class="metric-card income">
+          <div class="metric-label">Revenus</div>
+          <div class="metric-value">+{{ formatAmount(summary()?.incomeTotal) }}</div>
+        </div>
+        <div class="metric-card expense">
+          <div class="metric-label">Dépenses</div>
+          <div class="metric-value">-{{ formatAmount(summary()?.expenseTotal) }}</div>
         </div>
       </div>
-      <div class="info-pill">
-        <div class="pill-label">Pays / locale</div>
-        <div class="pill-value">{{ user()?.currency?.locale ?? '—' }}</div>
+    </section>
+
+    @if (hasNoActivity()) {
+      <section class="empty-state">
+        <div class="empty-icon">0</div>
+        <h2>Aucune activité ce mois-ci</h2>
+        <p>Ajoutez vos premières transactions pour visualiser vos statistiques.</p>
+      </section>
+    }
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>Dépenses par catégorie</h2>
       </div>
-    </div>
-  </section>
+      @if (categoryExpenses().length) {
+        <div class="category-list">
+          @for (category of categoryExpenses(); track category.categoryId) {
+            <article class="category-row">
+              <div class="category-dot" [style.background]="category.categoryColor"></div>
+              <div class="category-main">
+                <div class="category-top">
+                  <span>{{ category.categoryName }}</span>
+                  <strong>{{ formatAmount(category.totalAmount) }}</strong>
+                </div>
+                <div class="category-meta">{{ category.transactionCount }} transaction(s)</div>
+                <div class="progress-track">
+                  <div class="progress-fill" [style.width.%]="categoryPercent(category)"></div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="panel-empty">Aucune dépense catégorisée sur la période.</p>
+      }
+    </section>
 
-  <p class="placeholder-note">
-    Votre tableau de bord complet (solde, statistiques, transactions) arrivera dans les prochaines étapes.
-  </p>
+    <section class="panel">
+      <div class="section-header">
+        <h2>Évolution mensuelle</h2>
+      </div>
+      @if (monthlyBalances().length) {
+        <div class="monthly-chart" aria-label="Évolution mensuelle du solde">
+          @for (balance of monthlyBalances(); track balance.year + '-' + balance.month) {
+            <div class="month-bar">
+              <div class="bar-wrap">
+                <div
+                  class="bar-fill"
+                  [class.negative]="balance.balance < 0"
+                  [style.height.px]="monthlyBarHeight(balance)"
+                ></div>
+              </div>
+              <span>{{ monthLabel(balance) }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="panel-empty">Pas encore d'évolution mensuelle à afficher.</p>
+      }
+    </section>
 
-  <button class="btn-logout" type="button" (click)="onLogout()" [disabled]="isLoggingOut()">
-    {{ isLoggingOut() ? 'Déconnexion…' : 'Se déconnecter' }}
-  </button>
+    <section class="panel">
+      <div class="section-header">
+        <h2>Dernières transactions</h2>
+      </div>
+      @if (recentTransactions().length) {
+        <ion-list class="transaction-list">
+          @for (transaction of recentTransactions(); track transaction.id) {
+            <ion-item lines="none" class="transaction-item">
+              <ion-label>
+                <div class="transaction-title">{{ transaction.category.name }}</div>
+                <div class="transaction-meta">{{ transaction.date }} · {{ transaction.note || 'Sans note' }}</div>
+              </ion-label>
+              <strong [class.income]="transaction.type === 'INCOME'" [class.expense]="transaction.type === 'EXPENSE'">
+                {{ transaction.type === 'INCOME' ? '+' : '-' }}{{ formatAmount(transaction.amount) }}
+              </strong>
+            </ion-item>
+          }
+        </ion-list>
+      } @else {
+        <p class="panel-empty">Aucune transaction récente.</p>
+      }
+    </section>
+  }
 </main>
