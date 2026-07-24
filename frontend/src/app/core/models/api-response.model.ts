@@ -4,7 +4,7 @@
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
-  message: string;
+  message?: string;
   timestamp: string;
   error?: ApiError;
 }

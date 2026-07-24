@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 
 /**
- * Routes de l'application OWOMI (J2-B : authentification).
+ * Routes de l'application OWOMI.
  */
 export const routes: Routes = [
   { path: '', redirectTo: 'splash', pathMatch: 'full' },
@@ -13,6 +13,10 @@ export const routes: Routes = [
   },
   {
     path: 'auth',
+    loadComponent: () =>
+      import('./layouts/auth-layout/auth-layout.component').then(
+        (m) => m.AuthLayoutComponent
+      ),
     children: [
       {
         path: 'login',
@@ -57,13 +61,21 @@ export const routes: Routes = [
   },
   {
     path: 'app',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./layouts/app-layout/app-layout.component').then(
+        (m) => m.AppLayoutComponent
+      ),
     children: [
       {
         path: 'dashboard',
-        canActivate: [AuthGuard],
         loadComponent: () =>
           import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
       },
+      { path: 'transactions', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'categories', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'reports', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'settings', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

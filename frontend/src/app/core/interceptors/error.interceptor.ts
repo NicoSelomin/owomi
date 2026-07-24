@@ -5,11 +5,13 @@ import {
   BehaviorSubject,
   catchError,
   filter,
+  map,
   switchMap,
   take,
   throwError,
 } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { ErrorService } from '../services/error.service';
 
 // État partagé pour éviter plusieurs refresh simultanés (single-flight)
 let isRefreshing = false;
@@ -22,6 +24,7 @@ const refreshedToken$ = new BehaviorSubject<string | null>(null);
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const errorService = inject(ErrorService);
   const router = inject(Router);
 
   // Les endpoints d'auth ne déclenchent pas de refresh (évite les boucles)
@@ -33,7 +36,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status !== 401 || isAuthEndpoint) {
-        return throwError(() => error);
+        return throwError(() => errorService.toUiError(error));
       }
 
       // Un refresh est déjà en cours : on attend le nouveau token puis on rejoue
@@ -55,11 +58,13 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           refreshedToken$.next(newToken);
           return next(addToken(req, newToken));
         }),
+        map((event) => event),
         catchError((refreshError) => {
           isRefreshing = false;
+          refreshedToken$.next(null);
           authService.clearSession();
           router.navigate(['/auth/login']);
-          return throwError(() => refreshError);
+          return throwError(() => errorService.toUiError(refreshError));
         })
       );
     })

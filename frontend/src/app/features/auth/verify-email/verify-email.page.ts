@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { AuthFeedbackService } from '../../../core/services/auth-feedback.service';
+import { UiError } from '../../../core/services/error.service';
 
 type VerifyState = 'loading' | 'success' | 'error';
 
@@ -19,11 +20,12 @@ type VerifyState = 'loading' | 'success' | 'error';
 export class VerifyEmailPage implements OnInit {
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private feedback = inject(AuthFeedbackService);
 
   readonly state = signal<VerifyState>('loading');
   readonly errorMessage = signal<string>('');
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const token = this.route.snapshot.queryParamMap.get('token');
 
     if (!token) {
@@ -32,23 +34,26 @@ export class VerifyEmailPage implements OnInit {
       return;
     }
 
-    this.authService.verifyEmail(token).subscribe({
-      next: () => this.state.set('success'),
-      error: (err: HttpErrorResponse) => {
-        const code = err.error?.error?.code;
-        this.state.set('error');
-        if (code === 'VERIFICATION_TOKEN_EXPIRED') {
-          this.errorMessage.set(
-            'Ce lien de vérification a expiré. Veuillez vous reconnecter pour en recevoir un nouveau.'
-          );
-        } else if (code === 'VERIFICATION_TOKEN_INVALID') {
-          this.errorMessage.set(
-            'Ce lien de vérification est invalide ou a déjà été utilisé.'
-          );
-        } else {
-          this.errorMessage.set('Une erreur est survenue. Veuillez réessayer plus tard.');
-        }
-      },
-    });
+    try {
+      await this.feedback.runWithLoading('Vérification en cours...', () =>
+        this.authService.verifyEmail(token)
+      );
+      this.state.set('success');
+      await this.feedback.showToast('Adresse email vérifiée.', 'success');
+    } catch (error) {
+      const err = error as UiError;
+      this.state.set('error');
+      if (err.code === 'VERIFICATION_TOKEN_EXPIRED') {
+        this.errorMessage.set(
+          'Ce lien de vérification a expiré. Veuillez vous reconnecter pour en recevoir un nouveau.'
+        );
+      } else if (err.code === 'VERIFICATION_TOKEN_INVALID') {
+        this.errorMessage.set(
+          'Ce lien de vérification est invalide ou a déjà été utilisé.'
+        );
+      } else {
+        this.errorMessage.set(err.message);
+      }
+    }
   }
 }

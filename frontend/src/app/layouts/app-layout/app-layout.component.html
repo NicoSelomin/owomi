@@ -1,0 +1,34 @@
+<div class="app-layout">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>OWOMI</ion-title>
+      <button
+        class="logout-button"
+        type="button"
+        slot="end"
+        (click)="logout()"
+        [disabled]="isLoggingOut()"
+      >
+        Déconnexion
+      </button>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <main class="app-layout__content">
+      <router-outlet></router-outlet>
+    </main>
+  </ion-content>
+
+  <ion-tab-bar slot="bottom">
+    @for (item of navigation; track item.route) {
+      <ion-tab-button
+        [routerLink]="item.disabled ? null : item.route"
+        routerLinkActive="tab-selected"
+        [disabled]="item.disabled"
+      >
+        <ion-label>{{ item.label }}</ion-label>
+      </ion-tab-button>
+    }
+  </ion-tab-bar>
+</div>

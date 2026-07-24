@@ -1,11 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { Observable, finalize, tap } from 'rxjs';
 import { ApiResponse } from '../models/api-response.model';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.model';
 import { User } from '../models/user.model';
+import { ApiService } from './api.service';
 import { TokenService } from './token.service';
+import { UserService } from './user.service';
 
 /**
  * Service d'authentification : inscription, connexion, déconnexion, refresh.
@@ -13,11 +13,9 @@ import { TokenService } from './token.service';
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
-  private tokenService = inject(TokenService);
-
-  private readonly BASE_URL = `${environment.apiBaseUrl}/api/auth`;
-  private readonly USERS_URL = `${environment.apiBaseUrl}/api/users`;
+  private readonly api = inject(ApiService);
+  private readonly tokenService = inject(TokenService);
+  private readonly userService = inject(UserService);
 
   /** Utilisateur connecté (null si déconnecté). */
   private readonly _currentUser = signal<User | null>(null);
@@ -29,29 +27,28 @@ export class AuthService {
   );
 
   register(request: RegisterRequest): Observable<ApiResponse<AuthResponse>> {
-    return this.http
-      .post<ApiResponse<AuthResponse>>(`${this.BASE_URL}/register`, request)
+    return this.api
+      .post<ApiResponse<AuthResponse>, RegisterRequest>('/api/auth/register', request)
       .pipe(tap((res) => this.handleAuthSuccess(res.data)));
   }
 
   login(request: LoginRequest): Observable<ApiResponse<AuthResponse>> {
-    return this.http
-      .post<ApiResponse<AuthResponse>>(`${this.BASE_URL}/login`, request)
+    return this.api
+      .post<ApiResponse<AuthResponse>, LoginRequest>('/api/auth/login', request)
       .pipe(tap((res) => this.handleAuthSuccess(res.data)));
   }
 
   /** Rafraîchit l'access token à partir du refresh token stocké. */
   refreshToken(): Observable<ApiResponse<AuthResponse>> {
     const refreshToken = this.tokenService.getRefreshToken();
-    return this.http
-      .post<ApiResponse<AuthResponse>>(`${this.BASE_URL}/refresh`, { refreshToken })
+    return this.api
+      .post<ApiResponse<AuthResponse>, { refreshToken: string | null }>('/api/auth/refresh', { refreshToken })
       .pipe(tap((res) => this.tokenService.setAccessToken(res.data.accessToken)));
   }
 
   /** Confirme l'adresse email à partir du token reçu par email (lien de vérification). */
   verifyEmail(token: string): Observable<ApiResponse<void>> {
-    const params = new HttpParams().set('token', token);
-    return this.http.get<ApiResponse<void>>(`${this.BASE_URL}/verify-email`, { params });
+    return this.api.get<ApiResponse<void>>('/api/auth/verify-email', { token });
   }
 
   /**
@@ -59,7 +56,7 @@ export class AuthService {
    * Le backend répond toujours 200 (pas de fuite sur l'existence du compte).
    */
   resendVerification(email: string): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(`${this.BASE_URL}/resend-verification`, { email });
+    return this.api.post<ApiResponse<void>, { email: string }>('/api/auth/resend-verification', { email });
   }
 
   /**
@@ -67,12 +64,12 @@ export class AuthService {
    * Le backend répond toujours 200 (pas de fuite sur l'existence du compte).
    */
   forgotPassword(email: string): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(`${this.BASE_URL}/forgot-password`, { email });
+    return this.api.post<ApiResponse<void>, { email: string }>('/api/auth/forgot-password', { email });
   }
 
   /** Applique un nouveau mot de passe à partir d'un token de réinitialisation. */
   resetPassword(token: string, newPassword: string): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(`${this.BASE_URL}/reset-password`, {
+    return this.api.post<ApiResponse<void>, { token: string; newPassword: string }>('/api/auth/reset-password', {
       token,
       newPassword,
     });
@@ -81,9 +78,9 @@ export class AuthService {
   /** Déconnexion : révoque le refresh token côté serveur puis nettoie l'état local. */
   logout(): Observable<ApiResponse<void>> {
     const refreshToken = this.tokenService.getRefreshToken();
-    return this.http
-      .post<ApiResponse<void>>(`${this.BASE_URL}/logout`, { refreshToken })
-      .pipe(tap(() => this.clearSession()));
+    return this.api
+      .post<ApiResponse<void>, { refreshToken: string | null }>('/api/auth/logout', { refreshToken })
+      .pipe(finalize(() => this.clearSession()));
   }
 
   /** Nettoie l'état local sans appel réseau (ex : échec de refresh). */
@@ -97,8 +94,8 @@ export class AuthService {
    * Utilisé au rechargement de page pour réhydrater currentUser.
    */
   loadCurrentUser(): Observable<ApiResponse<User>> {
-    return this.http
-      .get<ApiResponse<User>>(`${this.USERS_URL}/me`)
+    return this.userService
+      .getMe()
       .pipe(tap((res) => this._currentUser.set(res.data)));
   }
 
