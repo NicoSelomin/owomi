@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { UiError } from '../../../core/services/error.service';
 
 type VerifyState = 'loading' | 'success' | 'error';
 
@@ -34,19 +34,18 @@ export class VerifyEmailPage implements OnInit {
 
     this.authService.verifyEmail(token).subscribe({
       next: () => this.state.set('success'),
-      error: (err: HttpErrorResponse) => {
-        const code = err.error?.error?.code;
+      error: (err: UiError) => {
         this.state.set('error');
-        if (code === 'VERIFICATION_TOKEN_EXPIRED') {
+        if (err.code === 'VERIFICATION_TOKEN_EXPIRED') {
           this.errorMessage.set(
             'Ce lien de vérification a expiré. Veuillez vous reconnecter pour en recevoir un nouveau.'
           );
-        } else if (code === 'VERIFICATION_TOKEN_INVALID') {
+        } else if (err.code === 'VERIFICATION_TOKEN_INVALID') {
           this.errorMessage.set(
             'Ce lien de vérification est invalide ou a déjà été utilisé.'
           );
         } else {
-          this.errorMessage.set('Une erreur est survenue. Veuillez réessayer plus tard.');
+          this.errorMessage.set(err.message);
         }
       },
     });

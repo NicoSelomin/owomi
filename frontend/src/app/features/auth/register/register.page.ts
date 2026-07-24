@@ -1,8 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { UiError } from '../../../core/services/error.service';
 import {
   passwordScore,
   passwordStrengthValidator,
@@ -189,16 +189,14 @@ export class RegisterPage {
           sessionStorage.setItem('owomi_pending_email', raw.email.trim());
           this.router.navigateByUrl('/auth/email-sent');
         },
-        error: (err: HttpErrorResponse) => {
+        error: (err: UiError) => {
           this.isLoading.set(false);
-          const code = err.error?.error?.code;
-          if (code === 'EMAIL_ALREADY_EXISTS') {
+          if (err.code === 'EMAIL_ALREADY_EXISTS') {
             this.registerError.set('Cet email est déjà utilisé.');
-          } else if (code === 'VALIDATION_ERROR') {
-            const details: string[] = err.error?.error?.details ?? [];
-            this.registerError.set(details[0] ?? 'Données invalides.');
+          } else if (err.code === 'VALIDATION_ERROR') {
+            this.registerError.set(err.details[0] ?? 'Données invalides.');
           } else {
-            this.registerError.set('Une erreur est survenue. Veuillez réessayer.');
+            this.registerError.set(err.message);
           }
         },
       });

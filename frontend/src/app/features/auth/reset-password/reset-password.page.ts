@@ -7,8 +7,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { UiError } from '../../../core/services/error.service';
 import {
   passwordScore,
   passwordStrengthValidator,
@@ -133,22 +133,20 @@ export class ResetPasswordPage implements OnInit {
         // Redirection automatique vers la connexion après quelques secondes
         setTimeout(() => this.router.navigateByUrl('/auth/login'), 4000);
       },
-      error: (err: HttpErrorResponse) => {
+      error: (err: UiError) => {
         this.isLoading.set(false);
-        const code = err.error?.error?.code;
-        if (code === 'RESET_TOKEN_EXPIRED') {
+        if (err.code === 'RESET_TOKEN_EXPIRED') {
           this.resetError.set(
             'Ce lien de réinitialisation a expiré. Veuillez en demander un nouveau.'
           );
-        } else if (code === 'RESET_TOKEN_INVALID') {
+        } else if (err.code === 'RESET_TOKEN_INVALID') {
           this.resetError.set(
             'Ce lien de réinitialisation est invalide ou a déjà été utilisé.'
           );
-        } else if (code === 'VALIDATION_ERROR') {
-          const details: string[] = err.error?.error?.details ?? [];
-          this.resetError.set(details[0] ?? 'Mot de passe invalide.');
+        } else if (err.code === 'VALIDATION_ERROR') {
+          this.resetError.set(err.details[0] ?? 'Mot de passe invalide.');
         } else {
-          this.resetError.set('Une erreur est survenue. Veuillez réessayer.');
+          this.resetError.set(err.message);
         }
       },
     });

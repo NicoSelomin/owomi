@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { UiError } from '../../../core/services/error.service';
 
 /**
  * Page de connexion — reproduction de docs/mockups/owomi_login.html.
@@ -77,13 +77,12 @@ export class LoginPage {
           this.route.snapshot.queryParamMap.get('returnUrl') ?? '/app/dashboard';
         this.router.navigateByUrl(returnUrl);
       },
-      error: (err: HttpErrorResponse) => {
+      error: (err: UiError) => {
         this.isLoading.set(false);
-        const code = err.error?.error?.code;
         this.loginError.set(
-          code === 'INVALID_CREDENTIALS'
+          err.code === 'INVALID_CREDENTIALS'
             ? 'Email ou mot de passe incorrect.'
-            : 'Une erreur est survenue. Veuillez réessayer.'
+            : err.message
         );
       },
     });
