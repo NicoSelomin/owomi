@@ -1,0 +1,107 @@
+<main class="transactions-page">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content pullingText="Tirer pour actualiser" refreshingText="Actualisation..."></ion-refresher-content>
+  </ion-refresher>
+
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Transactions</p>
+      <h1>Suivi des mouvements</h1>
+      <p class="subtitle">{{ totalElements() }} transaction(s)</p>
+    </div>
+    <a class="primary-action" routerLink="/app/transactions/new">Ajouter</a>
+  </header>
+
+  <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()" novalidate>
+    <label>
+      Type
+      <select formControlName="type" (change)="onTypeChange()">
+        <option value="">Tous</option>
+        <option value="INCOME">Revenus</option>
+        <option value="EXPENSE">Dépenses</option>
+      </select>
+    </label>
+
+    <label>
+      Catégorie
+      <select formControlName="categoryId">
+        <option value="">Toutes</option>
+        @for (category of filteredCategories(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Début
+      <input type="date" formControlName="startDate">
+    </label>
+
+    <label>
+      Fin
+      <input type="date" formControlName="endDate">
+    </label>
+
+    <div class="filter-actions">
+      <button class="secondary-button" type="button" (click)="resetFilters()">Réinitialiser</button>
+      <button class="primary-button" type="submit">Filtrer</button>
+    </div>
+  </form>
+
+  @if (errorMessage()) {
+    <section class="error-state">
+      <p>{{ errorMessage() }}</p>
+      <button type="button" (click)="loadInitial()">Réessayer</button>
+    </section>
+  }
+
+  @if (isLoading()) {
+    <section class="transaction-skeleton" aria-label="Chargement des transactions">
+      @for (item of [1, 2, 3, 4]; track item) {
+        <div class="transaction-card">
+          <ion-skeleton-text animated class="skeleton-title"></ion-skeleton-text>
+          <ion-skeleton-text animated class="skeleton-line"></ion-skeleton-text>
+        </div>
+      }
+    </section>
+  } @else if (!hasTransactions() && !errorMessage()) {
+    <section class="empty-state">
+      <div class="empty-icon">0</div>
+      <h2>Aucune transaction</h2>
+      <p>Ajoutez un revenu ou une dépense pour commencer votre suivi.</p>
+      <a class="primary-action" routerLink="/app/transactions/new">Créer une transaction</a>
+    </section>
+  } @else {
+    <ion-list class="transaction-list">
+      @for (transaction of transactions(); track transaction.id) {
+        <ion-item lines="none" class="transaction-card">
+          <ion-label>
+            <div class="transaction-head">
+              <div>
+                <span class="type-badge" [class.income]="transaction.type === 'INCOME'">
+                  {{ typeLabel(transaction.type) }}
+                </span>
+                <h2>{{ transaction.category.name }}</h2>
+              </div>
+              <strong [class.income]="transaction.type === 'INCOME'">
+                {{ transaction.type === 'INCOME' ? '+' : '-' }}{{ formatAmount(transaction) }}
+              </strong>
+            </div>
+            <p class="transaction-note">{{ transaction.note || 'Sans description' }}</p>
+            <p class="transaction-date">{{ transaction.date }}</p>
+            <div class="transaction-actions">
+              <a [routerLink]="['/app/transactions', transaction.id, 'edit']">Modifier</a>
+              <button type="button" (click)="confirmDelete(transaction)">Supprimer</button>
+            </div>
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+
+    @if (canLoadMore()) {
+      <button class="load-more" type="button" (click)="loadMore()" [disabled]="isLoadingMore()">
+        {{ isLoadingMore() ? 'Chargement...' : 'Charger plus' }}
+      </button>
+    }
+  }
+</main>

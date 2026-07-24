@@ -36,6 +36,24 @@ describe('TransactionService', () => {
     req.flush({ success: true, data: { content: [] }, timestamp: '2026-01-01T00:00:00Z' });
   });
 
+  it('does not send empty optional filters', () => {
+    service
+      .findAll({ type: undefined, categoryId: undefined, startDate: undefined, endDate: undefined, page: 0, size: 20 })
+      .subscribe();
+
+    const req = httpMock.expectOne(
+      (request) =>
+        request.url === 'http://localhost:8080/api/transactions' &&
+        request.params.get('page') === '0' &&
+        request.params.get('size') === '20'
+    );
+    expect(req.request.params.has('type')).toBeFalse();
+    expect(req.request.params.has('categoryId')).toBeFalse();
+    expect(req.request.params.has('startDate')).toBeFalse();
+    expect(req.request.params.has('endDate')).toBeFalse();
+    req.flush({ success: true, data: { content: [] }, timestamp: '2026-01-01T00:00:00Z' });
+  });
+
   it('supports detail, create, update and delete', () => {
     const body = { amount: 10, type: 'EXPENSE' as const, categoryId: 10, date: '2026-01-01', note: 'note' };
 

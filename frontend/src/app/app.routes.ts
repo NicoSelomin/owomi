@@ -72,7 +72,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
       },
-      { path: 'transactions', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'transactions',
+        loadComponent: () =>
+          import('./features/transactions/transactions.page').then((m) => m.TransactionsPage),
+      },
+      {
+        path: 'transactions/new',
+        loadComponent: () =>
+          import('./features/transactions/transaction-form.page').then((m) => m.TransactionFormPage),
+      },
+      {
+        path: 'transactions/:id/edit',
+        loadComponent: () =>
+          import('./features/transactions/transaction-form.page').then((m) => m.TransactionFormPage),
+      },
       { path: 'categories', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'reports', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'settings', redirectTo: 'dashboard', pathMatch: 'full' },
