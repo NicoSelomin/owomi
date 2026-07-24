@@ -227,6 +227,36 @@ class TransactionControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/transactions : Content-Type non supporté → UNSUPPORTED_MEDIA_TYPE")
+    void create_UnsupportedMediaType_ShouldReturnApiResponse() throws Exception {
+        authenticate();
+
+        mockMvc.perform(post("/api/transactions")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("{\"amount\":12.00}"))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("UNSUPPORTED_MEDIA_TYPE"))
+                .andExpect(jsonPath("$.error.message").value("Type de contenu non supporté."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("POST /api/transactions : JSON malformé → VALIDATION_ERROR")
+    void create_MalformedJson_ShouldReturnValidationError() throws Exception {
+        authenticate();
+
+        mockMvc.perform(post("/api/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"amount\":12.00,\"type\":\"EXPENSE\","))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.error.message").value("Le corps de la requête est invalide."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
     @DisplayName("POST /api/transactions : date future → FUTURE_DATE")
     void create_FutureDate_ShouldReturnBusinessError() throws Exception {
         User user = authenticate();

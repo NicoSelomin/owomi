@@ -30,16 +30,26 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("userId") UUID userId
     );
 
-    @Query("""
-        SELECT t FROM Transaction t
-        JOIN FETCH t.category
-        WHERE t.user.id = :userId
-        AND (:type IS NULL OR t.type = :type)
-        AND (:categoryId IS NULL OR t.category.id = :categoryId)
-        AND (:startDate IS NULL OR t.date >= :startDate)
-        AND (:endDate IS NULL OR t.date <= :endDate)
-        ORDER BY t.date DESC, t.createdAt DESC
-        """)
+    @Query(
+            value = """
+                SELECT t FROM Transaction t
+                JOIN FETCH t.category
+                WHERE t.user.id = :userId
+                AND t.type = COALESCE(:type, t.type)
+                AND t.category.id = COALESCE(:categoryId, t.category.id)
+                AND t.date >= COALESCE(:startDate, t.date)
+                AND t.date <= COALESCE(:endDate, t.date)
+                ORDER BY t.date DESC, t.createdAt DESC
+                """,
+            countQuery = """
+                SELECT COUNT(t) FROM Transaction t
+                WHERE t.user.id = :userId
+                AND t.type = COALESCE(:type, t.type)
+                AND t.category.id = COALESCE(:categoryId, t.category.id)
+                AND t.date >= COALESCE(:startDate, t.date)
+                AND t.date <= COALESCE(:endDate, t.date)
+                """
+    )
     Page<Transaction> findByUserAndFilters(
             @Param("userId") UUID userId,
             @Param("type") TransactionType type,
