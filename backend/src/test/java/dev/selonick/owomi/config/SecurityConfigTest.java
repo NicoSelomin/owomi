@@ -8,6 +8,8 @@ import dev.selonick.owomi.category.CategoryService;
 import dev.selonick.owomi.common.HealthController;
 import dev.selonick.owomi.currency.CurrencyController;
 import dev.selonick.owomi.currency.CurrencyService;
+import dev.selonick.owomi.dashboard.DashboardController;
+import dev.selonick.owomi.dashboard.DashboardService;
 import dev.selonick.owomi.transaction.TransactionController;
 import dev.selonick.owomi.transaction.TransactionService;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         HealthController.class,
         CurrencyController.class,
         CategoryController.class,
-        TransactionController.class
+        TransactionController.class,
+        DashboardController.class
 })
 @Import({
         SecurityConfig.class,
@@ -61,6 +64,9 @@ class SecurityConfigTest {
 
     @MockitoBean
     private TransactionService transactionService;
+
+    @MockitoBean
+    private DashboardService dashboardService;
 
     @MockitoBean
     private JpaMetamodelMappingContext jpaMappingContext;
@@ -118,6 +124,33 @@ class SecurityConfigTest {
     @DisplayName("SecurityConfig : protège /api/transactions sans token")
     void transactionsEndpoint_WithoutToken_ShouldReturnUnauthorizedJson() throws Exception {
         mockMvc.perform(get("/api/transactions").secure(true))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("TOKEN_INVALID"));
+    }
+
+    @Test
+    @DisplayName("SecurityConfig : protège /api/dashboard/summary sans token")
+    void dashboardSummaryEndpoint_WithoutToken_ShouldReturnUnauthorizedJson() throws Exception {
+        mockMvc.perform(get("/api/dashboard/summary").secure(true))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("TOKEN_INVALID"));
+    }
+
+    @Test
+    @DisplayName("SecurityConfig : protège /api/dashboard/monthly-balances sans token")
+    void dashboardMonthlyBalancesEndpoint_WithoutToken_ShouldReturnUnauthorizedJson() throws Exception {
+        mockMvc.perform(get("/api/dashboard/monthly-balances").secure(true))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("TOKEN_INVALID"));
+    }
+
+    @Test
+    @DisplayName("SecurityConfig : protège /api/dashboard/category-expenses sans token")
+    void dashboardCategoryExpensesEndpoint_WithoutToken_ShouldReturnUnauthorizedJson() throws Exception {
+        mockMvc.perform(get("/api/dashboard/category-expenses").secure(true))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("TOKEN_INVALID"));
