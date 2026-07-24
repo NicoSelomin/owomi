@@ -12,6 +12,7 @@ import dev.selonick.owomi.dashboard.DashboardController;
 import dev.selonick.owomi.dashboard.DashboardService;
 import dev.selonick.owomi.transaction.TransactionController;
 import dev.selonick.owomi.transaction.TransactionService;
+import dev.selonick.owomi.transaction.export.TransactionExportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -64,6 +66,9 @@ class SecurityConfigTest {
 
     @MockitoBean
     private TransactionService transactionService;
+
+    @MockitoBean
+    private TransactionExportService transactionExportService;
 
     @MockitoBean
     private DashboardService dashboardService;
@@ -124,6 +129,28 @@ class SecurityConfigTest {
     @DisplayName("SecurityConfig : protège /api/transactions sans token")
     void transactionsEndpoint_WithoutToken_ShouldReturnUnauthorizedJson() throws Exception {
         mockMvc.perform(get("/api/transactions").secure(true))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("TOKEN_INVALID"));
+    }
+
+    @Test
+    @DisplayName("SecurityConfig : protège /api/transactions/export/csv sans token")
+    void transactionsExportEndpoint_WithoutToken_ShouldReturnUnauthorizedJson() throws Exception {
+        mockMvc.perform(get("/api/transactions/export/csv").secure(true))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("TOKEN_INVALID"));
+    }
+
+    @Test
+    @DisplayName("SecurityConfig : protège /api/transactions/export/csv avec token invalide")
+    void transactionsExportEndpoint_InvalidToken_ShouldReturnUnauthorizedJson() throws Exception {
+        when(jwtService.extractEmail("invalid.jwt.token")).thenThrow(new IllegalArgumentException("invalid token"));
+
+        mockMvc.perform(get("/api/transactions/export/csv")
+                        .secure(true)
+                        .header("Authorization", "Bearer invalid.jwt.token"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("TOKEN_INVALID"));

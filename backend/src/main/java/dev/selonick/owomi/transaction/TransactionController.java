@@ -6,13 +6,18 @@ import dev.selonick.owomi.common.enums.TransactionType;
 import dev.selonick.owomi.transaction.dto.TransactionPageResponse;
 import dev.selonick.owomi.transaction.dto.TransactionRequest;
 import dev.selonick.owomi.transaction.dto.TransactionResponse;
+import dev.selonick.owomi.transaction.export.TransactionExportCsv;
+import dev.selonick.owomi.transaction.export.TransactionExportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,6 +43,7 @@ import java.time.LocalDate;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final TransactionExportService transactionExportService;
 
     @Operation(summary = "Liste paginée des transactions de l'utilisateur")
     @GetMapping
@@ -59,6 +65,30 @@ public class TransactionController {
                 size
         );
         return ResponseEntity.ok(ApiResponse.success(transactions, "Transactions récupérées."));
+    }
+
+    @Operation(summary = "Export CSV des transactions de l'utilisateur")
+    @GetMapping("/export/csv")
+    public ResponseEntity<byte[]> exportCsv(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        TransactionExportCsv csv = transactionExportService.exportCsv(
+                principal.getId(),
+                type,
+                categoryId,
+                startDate,
+                endDate
+        );
+        return ResponseEntity.ok()
+                .contentType(new MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                        .filename(csv.filename())
+                        .build()
+                        .toString())
+                .body(csv.content());
     }
 
     @Operation(summary = "Détail d'une transaction")

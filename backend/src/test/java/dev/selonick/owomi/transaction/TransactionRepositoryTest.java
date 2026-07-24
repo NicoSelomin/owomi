@@ -132,9 +132,83 @@ class TransactionRepositoryTest {
                 .doesNotContain("concat(");
     }
 
+    @Test
+    @DisplayName("findForExportByUserAndFilters : filtre obligatoirement par utilisateur")
+    void findForExportByUserAndFilters_ShouldFilterByUserId() throws NoSuchMethodException {
+        Query query = findForExportByUserAndFiltersQuery();
+
+        assertThat(query.value())
+                .contains("WHERE t.user.id = :userId")
+                .doesNotContain("OR t.user.id")
+                .doesNotContain("t.user.id = COALESCE");
+    }
+
+    @Test
+    @DisplayName("findForExportByUserAndFilters : période d'export paramétrée")
+    void findForExportByUserAndFilters_ShouldUseParameterizedPeriod() throws NoSuchMethodException {
+        Query query = findForExportByUserAndFiltersQuery();
+
+        assertThat(query.value())
+                .contains("t.date BETWEEN :startDate AND :endDate")
+                .doesNotContain(":startDate IS NULL")
+                .doesNotContain(":endDate IS NULL");
+    }
+
+    @Test
+    @DisplayName("findForExportByUserAndFilters : type et catégorie restent paramétrés")
+    void findForExportByUserAndFilters_ShouldUseParameterizedFilters() throws NoSuchMethodException {
+        Query query = findForExportByUserAndFiltersQuery();
+
+        assertThat(query.value())
+                .contains("t.type = COALESCE(:type, t.type)")
+                .contains("t.category.id = COALESCE(:categoryId, t.category.id)")
+                .doesNotContain("type = '")
+                .doesNotContain("category.id = '");
+    }
+
+    @Test
+    @DisplayName("findForExportByUserAndFilters : combinaison userId, période, type, catégorie")
+    void findForExportByUserAndFilters_ShouldCombineAllPredicates() throws NoSuchMethodException {
+        Query query = findForExportByUserAndFiltersQuery();
+
+        assertThat(query.value())
+                .containsSubsequence(
+                        "WHERE t.user.id = :userId",
+                        "AND t.date BETWEEN :startDate AND :endDate",
+                        "AND t.type = COALESCE(:type, t.type)",
+                        "AND t.category.id = COALESCE(:categoryId, t.category.id)"
+                );
+    }
+
+    @Test
+    @DisplayName("findForExportByUserAndFilters : isolation entre deux utilisateurs et requête statique")
+    void findForExportByUserAndFilters_ShouldIsolateUsersWithStaticQuery() throws NoSuchMethodException {
+        Query query = findForExportByUserAndFiltersQuery();
+
+        assertThat(query.value())
+                .contains("t.user.id = :userId")
+                .doesNotContain("${")
+                .doesNotContain("||")
+                .doesNotContain("concat(");
+    }
+
     private Query findByUserAndFiltersQuery() throws NoSuchMethodException {
         Method method = TransactionRepository.class.getDeclaredMethod(
                 "findByUserAndFilters",
+                UUID.class,
+                dev.selonick.owomi.common.enums.TransactionType.class,
+                Long.class,
+                LocalDate.class,
+                LocalDate.class,
+                org.springframework.data.domain.Pageable.class
+        );
+
+        return method.getAnnotation(Query.class);
+    }
+
+    private Query findForExportByUserAndFiltersQuery() throws NoSuchMethodException {
+        Method method = TransactionRepository.class.getDeclaredMethod(
+                "findForExportByUserAndFilters",
                 UUID.class,
                 dev.selonick.owomi.common.enums.TransactionType.class,
                 Long.class,

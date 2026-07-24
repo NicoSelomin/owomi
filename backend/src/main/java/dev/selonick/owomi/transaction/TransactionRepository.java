@@ -1,6 +1,7 @@
 package dev.selonick.owomi.transaction;
 
 import dev.selonick.owomi.common.enums.TransactionType;
+import dev.selonick.owomi.transaction.export.TransactionExportRow;
 import dev.selonick.owomi.transaction.projection.CategoryExpenseSummary;
 import dev.selonick.owomi.transaction.projection.MonthlyBalanceSummary;
 import org.springframework.data.domain.Page;
@@ -51,6 +52,36 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                 """
     )
     Page<Transaction> findByUserAndFilters(
+            @Param("userId") UUID userId,
+            @Param("type") TransactionType type,
+            @Param("categoryId") Long categoryId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT new dev.selonick.owomi.transaction.export.TransactionExportRow(
+            t.date,
+            t.type,
+            c.name,
+            t.amount,
+            cur.code,
+            t.note,
+            t.createdAt,
+            t.updatedAt
+        )
+        FROM Transaction t
+        JOIN t.category c
+        JOIN t.user u
+        LEFT JOIN u.currency cur
+        WHERE t.user.id = :userId
+        AND t.date BETWEEN :startDate AND :endDate
+        AND t.type = COALESCE(:type, t.type)
+        AND t.category.id = COALESCE(:categoryId, t.category.id)
+        ORDER BY t.date DESC, t.createdAt DESC
+        """)
+    List<TransactionExportRow> findForExportByUserAndFilters(
             @Param("userId") UUID userId,
             @Param("type") TransactionType type,
             @Param("categoryId") Long categoryId,
