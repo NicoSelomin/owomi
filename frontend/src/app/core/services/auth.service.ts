@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, finalize, tap } from 'rxjs';
 import { ApiResponse } from '../models/api-response.model';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.model';
 import { User } from '../models/user.model';
@@ -80,7 +80,7 @@ export class AuthService {
     const refreshToken = this.tokenService.getRefreshToken();
     return this.api
       .post<ApiResponse<void>, { refreshToken: string | null }>('/api/auth/logout', { refreshToken })
-      .pipe(tap(() => this.clearSession()));
+      .pipe(finalize(() => this.clearSession()));
   }
 
   /** Nettoie l'état local sans appel réseau (ex : échec de refresh). */

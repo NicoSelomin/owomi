@@ -2,6 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AuthFeedbackService } from '../../../core/services/auth-feedback.service';
+import { UiError } from '../../../core/services/error.service';
 
 /**
  * Page « Mot de passe oublié » : saisie de l'email et envoi du lien de réinitialisation.
@@ -18,6 +20,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class ForgotPasswordPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private feedback = inject(AuthFeedbackService);
 
   readonly isLoading = signal(false);
   readonly submitted = signal(false);
@@ -40,8 +43,13 @@ export class ForgotPasswordPage {
     return this.form.controls.email.value.trim();
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
+    if (this.isLoading()) {
+      return;
+    }
+
     this.submitError.set(null);
+    this.form.controls.email.setValue(this.form.controls.email.value.trim());
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -49,15 +57,16 @@ export class ForgotPasswordPage {
     }
 
     this.isLoading.set(true);
-    this.authService.forgotPassword(this.submittedEmail).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        this.submitted.set(true);
-      },
-      error: () => {
-        this.isLoading.set(false);
-        this.submitError.set('Une erreur réseau est survenue. Veuillez réessayer.');
-      },
-    });
+    try {
+      await this.feedback.runWithLoading('Envoi du lien...', () =>
+        this.authService.forgotPassword(this.submittedEmail)
+      );
+      this.submitted.set(true);
+      await this.feedback.showToast('Demande prise en compte.', 'success');
+    } catch (error) {
+      this.submitError.set((error as UiError).message);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 }

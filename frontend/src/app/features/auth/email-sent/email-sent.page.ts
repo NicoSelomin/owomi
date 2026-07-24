@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AuthFeedbackService } from '../../../core/services/auth-feedback.service';
 
 const PENDING_EMAIL_KEY = 'owomi_pending_email';
 const RESEND_COOLDOWN_SECONDS = 30;
@@ -19,6 +20,7 @@ const RESEND_COOLDOWN_SECONDS = 30;
 })
 export class EmailSentPage implements OnInit, OnDestroy {
   private authService = inject(AuthService);
+  private feedback = inject(AuthFeedbackService);
   private router = inject(Router);
 
   private intervalId: ReturnType<typeof setInterval> | null = null;
@@ -58,7 +60,7 @@ export class EmailSentPage implements OnInit, OnDestroy {
     this.clearTimer();
   }
 
-  onResend(): void {
+  async onResend(): Promise<void> {
     if (!this.canResend()) {
       return;
     }
@@ -66,18 +68,18 @@ export class EmailSentPage implements OnInit, OnDestroy {
     this.isResending.set(true);
     this.resendSuccess.set(false);
 
-    this.authService.resendVerification(this.email()).subscribe({
-      next: () => {
-        this.isResending.set(false);
-        this.resendSuccess.set(true);
-        this.startTimer();
-      },
-      error: () => {
-        // Le backend répond toujours 200 ; en cas d'erreur réseau on réarme simplement le minuteur.
-        this.isResending.set(false);
-        this.startTimer();
-      },
-    });
+    try {
+      await this.feedback.runWithLoading('Envoi du lien...', () =>
+        this.authService.resendVerification(this.email())
+      );
+      this.resendSuccess.set(true);
+      await this.feedback.showToast('Email de vérification renvoyé.', 'success');
+    } catch {
+      await this.feedback.showToast('Impossible de renvoyer le lien pour le moment.', 'danger');
+    } finally {
+      this.isResending.set(false);
+      this.startTimer();
+    }
   }
 
   /** (Re)démarre le décompte de 30 secondes. */

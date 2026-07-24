@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AuthFeedbackService } from '../../../core/services/auth-feedback.service';
 import { UiError } from '../../../core/services/error.service';
 import {
   passwordScore,
@@ -29,6 +30,7 @@ import {
 export class ResetPasswordPage implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private feedback = inject(AuthFeedbackService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -117,7 +119,11 @@ export class ResetPasswordPage implements OnInit {
     return this.form.hasError('passwordMismatch') && (confirm.touched || confirm.dirty);
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
+    if (this.isLoading()) {
+      return;
+    }
+
     this.resetError.set(null);
 
     if (this.form.invalid) {
@@ -126,29 +132,31 @@ export class ResetPasswordPage implements OnInit {
     }
 
     this.isLoading.set(true);
-    this.authService.resetPassword(this.token, this.form.controls.password.value).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        this.state.set('success');
-        // Redirection automatique vers la connexion après quelques secondes
-        setTimeout(() => this.router.navigateByUrl('/auth/login'), 4000);
-      },
-      error: (err: UiError) => {
-        this.isLoading.set(false);
-        if (err.code === 'RESET_TOKEN_EXPIRED') {
-          this.resetError.set(
-            'Ce lien de réinitialisation a expiré. Veuillez en demander un nouveau.'
-          );
-        } else if (err.code === 'RESET_TOKEN_INVALID') {
-          this.resetError.set(
-            'Ce lien de réinitialisation est invalide ou a déjà été utilisé.'
-          );
-        } else if (err.code === 'VALIDATION_ERROR') {
-          this.resetError.set(err.details[0] ?? 'Mot de passe invalide.');
-        } else {
-          this.resetError.set(err.message);
-        }
-      },
-    });
+    try {
+      await this.feedback.runWithLoading('Réinitialisation...', () =>
+        this.authService.resetPassword(this.token, this.form.controls.password.value)
+      );
+      this.state.set('success');
+      await this.feedback.showToast('Mot de passe modifié.', 'success');
+      // Redirection automatique vers la connexion après quelques secondes
+      setTimeout(() => this.router.navigateByUrl('/auth/login'), 4000);
+    } catch (error) {
+      const err = error as UiError;
+      if (err.code === 'RESET_TOKEN_EXPIRED') {
+        this.resetError.set(
+          'Ce lien de réinitialisation a expiré. Veuillez en demander un nouveau.'
+        );
+      } else if (err.code === 'RESET_TOKEN_INVALID') {
+        this.resetError.set(
+          'Ce lien de réinitialisation est invalide ou a déjà été utilisé.'
+        );
+      } else if (err.code === 'VALIDATION_ERROR') {
+        this.resetError.set(err.details[0] ?? 'Mot de passe invalide.');
+      } else {
+        this.resetError.set(err.message);
+      }
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 }

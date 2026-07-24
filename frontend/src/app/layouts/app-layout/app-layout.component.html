@@ -2,6 +2,15 @@
   <ion-header>
     <ion-toolbar>
       <ion-title>OWOMI</ion-title>
+      <button
+        class="logout-button"
+        type="button"
+        slot="end"
+        (click)="logout()"
+        [disabled]="isLoggingOut()"
+      >
+        Déconnexion
+      </button>
     </ion-toolbar>
   </ion-header>
 

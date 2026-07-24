@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AuthFeedbackService } from '../../../core/services/auth-feedback.service';
 import { UiError } from '../../../core/services/error.service';
 import {
   passwordScore,
@@ -34,6 +35,7 @@ interface CurrencyOption {
 export class RegisterPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private feedback = inject(AuthFeedbackService);
   private router = inject(Router);
 
   readonly showPassword = signal(false);
@@ -161,8 +163,14 @@ export class RegisterPage {
     return c.valid ? 'ok' : 'err';
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
+    if (this.isLoading()) {
+      return;
+    }
+
     this.registerError.set(null);
+    this.form.controls.name.setValue(this.form.controls.name.value.trim());
+    this.form.controls.email.setValue(this.form.controls.email.value.trim());
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -174,31 +182,32 @@ export class RegisterPage {
     const countryCode = raw.countryCode === 'OTHER' ? 'XX' : raw.countryCode;
 
     this.isLoading.set(true);
-    this.authService
-      .register({
-        name: raw.name.trim(),
-        email: raw.email.trim(),
+    try {
+      await this.feedback.runWithLoading('Création du compte...', () =>
+        this.authService.register({
+        name: raw.name,
+        email: raw.email,
         password: raw.password,
         countryCode,
         currencyCode: raw.currencyCode,
-      })
-      .subscribe({
-        next: () => {
-          this.isLoading.set(false);
-          // L'email en attente de vérification est conservé pour la page « Email envoyé »
-          sessionStorage.setItem('owomi_pending_email', raw.email.trim());
-          this.router.navigateByUrl('/auth/email-sent');
-        },
-        error: (err: UiError) => {
-          this.isLoading.set(false);
-          if (err.code === 'EMAIL_ALREADY_EXISTS') {
-            this.registerError.set('Cet email est déjà utilisé.');
-          } else if (err.code === 'VALIDATION_ERROR') {
-            this.registerError.set(err.details[0] ?? 'Données invalides.');
-          } else {
-            this.registerError.set(err.message);
-          }
-        },
-      });
+        })
+      );
+      this.authService.clearSession();
+      // L'email en attente de vérification est conservé pour la page « Email envoyé »
+      sessionStorage.setItem('owomi_pending_email', raw.email);
+      await this.feedback.showToast('Compte créé. Vérifiez votre adresse email.', 'success');
+      await this.router.navigateByUrl('/auth/email-sent');
+    } catch (error) {
+      const err = error as UiError;
+      if (err.code === 'EMAIL_ALREADY_EXISTS') {
+        this.registerError.set('Cet email est déjà utilisé.');
+      } else if (err.code === 'VALIDATION_ERROR') {
+        this.registerError.set(err.details[0] ?? 'Données invalides.');
+      } else {
+        this.registerError.set(err.message);
+      }
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 }
